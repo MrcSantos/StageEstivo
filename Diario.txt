@@ -1,8 +1,12 @@
 20 - 9
 - Setup posizione pc
 - Visione progetto
+- Inizio scheletro progettazione
 - Creazione user stories su Trello (Bacheca: https://trello.com/b/ACTZjzx3/stage-estivo)
 - Creazione repo su GitHub (Repo: https://github.com/MrcSossy/StageEstivo)
 - Introduzione a VueJs
 - Lettura documentazione di FullCalendar
 - Lettura documentazione di MomentJs
+- Lettura documentazione funzioni avanzate di FullCalendar
+- Lettura documentazione di SalesForce, VisualForce e Apex
+- Fine progettazione anche avanzata
