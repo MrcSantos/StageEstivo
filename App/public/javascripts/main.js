@@ -26,7 +26,7 @@ $(function () {
 				text: '+',
 
 				click: function () {
-					if (isDateSelected) { // If a date has been selected
+					if (isDateSelected()) { // If a date has been selected
 						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
 					}
 					else {  // If a date has NOT been selected
@@ -35,14 +35,14 @@ $(function () {
 						if (startDate) { // If the user insert a date
 							// Date parsing
 							var rawDateStart = moment(startDate);
-							var smartDateStart = moment(moment().get(year) + startDate);
+							var smartDateStart = moment(moment().get(year) + '-' + startDate);
 
 							if (rawDateStart.isValid()) { // If the date is valid
 								var endDate = prompt("Inserisci la data di fine (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
 
 								if (endDate) { // If the user insert a date
-									rawDateEnd = moment(endDate);
-									smartDateEnd = moment(moment().get(year) + endDate);
+									var rawDateEnd = moment(endDate);
+									var smartDateEnd = moment(moment().get(year) + '-' + startDate);
 
 									if (rawDateEnd.isValid()) {
 										makeEvent('Ore lavorate', rawDateStart, rawDateEnd);
