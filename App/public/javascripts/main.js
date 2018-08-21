@@ -20,6 +20,7 @@ $(function () {
 			addEventButton: {
 				text: '+',
 				click: function () {
+					alert(selectedStartDate);
 					var dateStr = prompt('Enter a date in YYYY-MM-DD format');
 					var date = moment(dateStr);
 					
@@ -41,6 +42,12 @@ $(function () {
 		select: function (startDate, endDate) {
 			selectedStartDate = startDate.format();
 			selectedEndDate = endDate.format();
+		},
+		unselect: function (jsEvent, view) {
+			setTimeout(() => {
+				selectedStartDate = undefined;
+				selectedEndDate = undefined;
+			}, 100);
 		}
 	});
 });
