@@ -14,13 +14,20 @@ $(function () {
 		nowIndicator: true, // Shows current date/time indicator
 		firstDay: 1, // Starts from Mon
 
-		minTime: '06:00:00', //* Shows day from 6:00
-		maxTime: '22:00:00', //  to 22:00 *//
+		minTime: '07:00:00', //* Shows day from 7:00
+		maxTime: '20:00:00', //  to 20:00 *//
+
+		businessHours: { // Darkens the area outside the work our in order to focus
+			dow: [1, 2, 3, 4, 5], // Monday - Friday
+
+			start: '9:00', // a start time
+			end: '18:00', // an end time
+		},
 
 		header: { // Header settings
 			left: 'today prev,next',
 			center: 'title',
-			right: 'addEventButton agendaWeek,agendaDay'
+			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
 		},
 
 		customButtons: {
@@ -36,6 +43,17 @@ $(function () {
 						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
 					}
 					else { alert("Nessuna data selezionata") } // If a date has NOT been selected
+				}
+			},
+
+			/**
+			 * 
+			 */
+			removeEventButton: {
+				text: '-', // Button text
+
+				click: function () {
+					deleteEvent();
 				}
 			}
 		},
@@ -70,4 +88,8 @@ function makeEvent(title, start, end) { // Creates an event on the calendar
 		end: end,
 		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
 	});
+}
+
+function deleteEvent(asd) {
+	$('#calendar').fullCalendar('removeEvents');
 }
