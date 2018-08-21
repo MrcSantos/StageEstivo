@@ -49,7 +49,7 @@ $(function () {
 			setSelected(startDate, endDate);
 		},
 		unselect: function (jsEvent, view) {
-			setTimeout(setSelected(), 1000);
+			setTimeout(() => setSelected(), 500);
 		}
 	});
 });
