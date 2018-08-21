@@ -1,3 +1,5 @@
+var selectedStartDate, selectedEndDate;
+
 $(function () {
 	$('#calendar').fullCalendar({
 		defaultView: 'agendaWeek',
@@ -7,7 +9,7 @@ $(function () {
 		minTime: '06:00:00',
 		maxTime: '22:00:00',
 		firstDay: 1,
-		
+
 		header: {
 			left: 'today prev,next',
 			center: 'title',
@@ -20,23 +22,25 @@ $(function () {
 				click: function () {
 					var dateStr = prompt('Enter a date in YYYY-MM-DD format');
 					var date = moment(dateStr);
-
-					if (date.isValid()) {
+					
+					if (!date.isValid()) {
 						var title = prompt('Enter a title');
 
 						$('#calendar').fullCalendar('renderEvent', {
 							title: title,
-							start: date,
-							allDay: true
+							start: selectedStartDate,
+							end: selectedEndDate
 						});
-						alert('Great. Now, update your database...');
 					} else {
 						alert('Invalid date.');
 					}
 				}
 			}
+		},
+
+		select: function (startDate, endDate) {
+			selectedStartDate = startDate.format();
+			selectedEndDate = endDate.format();
 		}
-
-
 	});
 });
