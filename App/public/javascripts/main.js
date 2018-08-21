@@ -20,7 +20,7 @@ $(function () {
 		customButtons: {
 			/**
 			 * Adds an event on the calendar on the selecter area,
-			 * if none are given it will ask for the date.
+			 * if none are given it will ask for it
 			 */
 			addEventButton: {
 				text: '+',
@@ -29,55 +29,7 @@ $(function () {
 					if (isDateSelected()) { // If a date has been selected
 						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
 					}
-					else {  // If a date has NOT been selected
-						var startDate = prompt("Inserisci la data di inizio (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
-
-						if (startDate) { // If the user insert a date
-							// Date parsing
-							var rawDateStart = moment(startDate);
-							var smartDateStart = moment(moment().get(year) + '-' + startDate);
-
-							if (rawDateStart.isValid()) { // If the date is valid
-								var endDate = prompt("Inserisci la data di fine (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
-
-								if (endDate) { // If the user insert a date
-									var rawDateEnd = moment(endDate);
-									var smartDateEnd = moment(moment().get(year) + '-' + startDate);
-
-									if (rawDateEnd.isValid()) {
-										makeEvent('Ore lavorate', rawDateStart, rawDateEnd);
-									}
-									else if (smartDateEnd.isValid()) {
-										makeEvent('Ore lavorate', rawDateStart, smartDateEnd);
-									}
-									else {
-										alert("Data non valida");
-									}
-								}
-							}
-							else if (smartDateStart.isValid()) { // If the date with the year is valid
-								var endDate = prompt("Inserisci la data di fine (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
-
-								if (endDate) { // If the user insert a date
-									rawDateEnd = moment(endDate);
-									smartDateEnd = moment(moment().get(year) + endDate);
-
-									if (rawDateEnd.isValid()) {
-										makeEvent('Ore lavorate', smartDateStart, rawDateEnd);
-									}
-									else if (smartDateEnd.isValid()) {
-										makeEvent('Ore lavorate', smartDateStart, smartDateEnd);
-									}
-									else {
-										alert("Data non valida");
-									}
-								}
-							}
-							else {
-								alert("Data non valida");
-							}
-						}
-					}
+					else { alert("Nessuna data selezionata") }
 				}
 			}
 		},
@@ -91,7 +43,7 @@ $(function () {
 			setTimeout(() => {
 				selectedStartDate = undefined;
 				selectedEndDate = undefined;
-			}, 100);
+			}, 1000);
 		}
 	});
 });
