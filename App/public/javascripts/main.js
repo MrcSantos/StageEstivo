@@ -1,17 +1,5 @@
 var selectedStartDate, selectedEndDate;
 
-function isDateSelected() { // Checks if a date has been selected
-	return selectedStartDate && selectedEndDate;
-}
-
-function makeEvent(title, start, end) { // Creates an event on the calendar
-	$('#calendar').fullCalendar('renderEvent', {
-		title: title,
-		start: start,
-		end: end
-	});
-}
-
 $(function () {
 	$('#calendar').fullCalendar({
 		defaultView: 'agendaWeek', // Agenda view as default
@@ -45,40 +33,50 @@ $(function () {
 						var startDate = prompt("Inserisci la data di inizio (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
 
 						if (startDate) { // If the user insert a date
-							var rawDate = moment(startDate);
-							var smartDate = moment(moment().get(year) + startDate);
-							
-							if (rawDate.isValid()) {
+							// Date parsing
+							var rawDateStart = moment(startDate);
+							var smartDateStart = moment(moment().get(year) + startDate);
+
+							if (rawDateStart.isValid()) { // If the date is valid
 								var endDate = prompt("Inserisci la data di fine (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
 
-								
+								if (endDate) { // If the user insert a date
+									rawDateEnd = moment(endDate);
+									smartDateEnd = moment(moment().get(year) + endDate);
+
+									if (rawDateEnd.isValid()) {
+										makeEvent('Ore lavorate', rawDateStart, rawDateEnd);
+									}
+									else if (smartDateEnd.isValid()) {
+										makeEvent('Ore lavorate', rawDateStart, smartDateEnd);
+									}
+									else {
+										alert("Data non valida");
+									}
+								}
 							}
-							else if (smartDate.isValid()) {
-								
+							else if (smartDateStart.isValid()) { // If the date with the year is valid
+								var endDate = prompt("Inserisci la data di fine (anno facoltativo) nel formato 'AA-MM-GG hh:mm'"); // Asks for the date
+
+								if (endDate) { // If the user insert a date
+									rawDateEnd = moment(endDate);
+									smartDateEnd = moment(moment().get(year) + endDate);
+
+									if (rawDateEnd.isValid()) {
+										makeEvent('Ore lavorate', smartDateStart, rawDateEnd);
+									}
+									else if (smartDateEnd.isValid()) {
+										makeEvent('Ore lavorate', smartDateStart, smartDateEnd);
+									}
+									else {
+										alert("Data non valida");
+									}
+								}
 							}
 							else {
 								alert("Data non valida");
 							}
 						}
-
-
-					}
-
-
-
-					var dateStr = prompt('Inserisci una data nel formato MM-DD hh:mm');
-					var date = moment('2018' + dateStr);
-					
-					if (!date.isValid()) {
-						var title = prompt('Enter a title');
-
-						$('#calendar').fullCalendar('renderEvent', {
-							title: title,
-							start: selectedStartDate,
-							end: selectedEndDate
-						});
-					} else {
-						alert('Invalid date.');
 					}
 				}
 			}
@@ -97,3 +95,15 @@ $(function () {
 		}
 	});
 });
+
+function isDateSelected() { // Checks if a date has been selected
+	return selectedStartDate && selectedEndDate;
+}
+
+function makeEvent(title, start, end) { // Creates an event on the calendar
+	$('#calendar').fullCalendar('renderEvent', {
+		title: title,
+		start: start,
+		end: end
+	});
+}
