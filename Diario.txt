@@ -10,3 +10,10 @@
 - Lettura documentazione funzioni avanzate di FullCalendar
 - Lettura documentazione di SalesForce, VisualForce e Apex
 - Fine progettazione anche avanzata
+- Pushati i primissimi snippets (CHE FANNO CRASHARE LA PAGINA (WTF?!))
+
+21 - 9
+- Riparazione snippets
+- preparazione alla release 0.0.1
+- Calendario base implementato correttamente nella pagina
+- Impostata la repo di GitHub correttamente
