@@ -21,3 +21,7 @@
 - Preparazione alla release 0.0.1
 - Riparazione web server
 - Preparazione alla release 0.0.2
+- Impostazioni di base per il calendario
+- Preparazione alla release 0.0.3
+- Impostazioni grafiche per il calendario
+- Preparazione alla release 0.0.4
