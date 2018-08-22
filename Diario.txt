@@ -43,3 +43,9 @@
 - Commit finale
 - Migliore apprensione dell'oggetto degli eventi
 - Presa di tutti i dati relativi a tutti gli eventi
+- Numerosi problemi con le richieste
+- Utilizzo di Axios al posto di Ajax per presunta incompatibilità
+- Creato metodo per scrivere i dati su un file di testo nel server
+- Release 0.1.1
+- Creato metodo per leggere i dati dal server
+- Release 0.1.2

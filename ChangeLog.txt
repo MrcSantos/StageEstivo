@@ -1,3 +1,12 @@
+Release 0.1.2:
+Lettura degli eventi dal server
+Prototipo della standardizzazione degli orari di lavoro
+
+Release 0.1.1:
+Richiesta salvataggio sul web server
+Accettazione delle richieste dal web server
+salvataggio su file di testo delle caratteristiche degli eventi
+
 //-Fine delle release versione 0--------------------------------------------------------//
 
 Release 0.0.7 - FINAL VERSION:
