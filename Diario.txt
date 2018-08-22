@@ -15,13 +15,21 @@
 21 - 9
 - Riparazione snippets
 - Calendario base implementato correttamente nella pagina
-- Preparazione alla release 0.0.0
+- Release 0.0.0
 - Trasferiti tutti i file in un web server con express
 - Impostato il web server affinchè funzioni
-- Preparazione alla release 0.0.1
+- Release 0.0.1
 - Riparazione web server
-- Preparazione alla release 0.0.2
+- Release 0.0.2
 - Impostazioni di base per il calendario
-- Preparazione alla release 0.0.3
+- Release 0.0.3
 - Impostazioni grafiche per il calendario
-- Preparazione alla release 0.0.4
+- Release 0.0.4
+- Utilizzo della funzione di selezione del calendario per avere un orario di inizio e fine per creare gli eventi
+- Refactory + bugfix nella creazione degli eventi
+- Release 0.0.5
+- Messo il campo per rendere gli eventi modificabili alla creazione
+- Resi gli eventi non stackabili gli uni sugli altri
+- Primo inserimento dell'eliminazione degli eventi
+- Release 0.0.6
+-

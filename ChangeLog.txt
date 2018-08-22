@@ -1,0 +1,21 @@
+Release 0.0.5:
+Modifica eventi
+Eliminazione eventi
+
+Release 0.0.4:
+Creazione eventi in modo dinamico
+Bugfixing
+Refactory
+
+Release 0.0.3:
+Impostazioni di base per il calendario
+Impostazioni grafiche per il calendario
+
+Release 0.0.2:
+Impostato il web server affinchè funzioni
+
+Release 0.0.1 - NON FUNZIONANTE:
+Trasferiti tutti i file in un web server con express
+
+Release 0.0.0:
+Calendario base implementato correttamente nella pagina
