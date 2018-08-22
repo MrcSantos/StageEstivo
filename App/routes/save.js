@@ -3,10 +3,13 @@ var router = express.Router();
 var fs = require('fs');
 
 var bp = require('body-parser');
-const bodyParser = bp.urlencoded({ extended: false }); // Utilizzato per leggere i dati passati dal client
+const bodyParser = bp.urlencoded({ extended: false }); // Used to parse client data
 
 router.post('/', bodyParser, function (req, res, next) {
-	fs.writeFile("DummyTest.txt", req.body);
+	console.log("Salvataggio...");
+	
+	fs.writeFile("DummyTest.txt", JSON.stringify(req.body));
+	res.send(200);
 });
 
 module.exports = router;

@@ -57,8 +57,10 @@ $(function () {
 							end: selectedEndDate
 						}
 
-						makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
-						saveOnServer("http://http://localhost:3000/save", currentEvent);
+						saveOnServer("/save", currentEvent, function (status) {
+							alert(status);
+							makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
+						});
 					}
 					else { alert("Nessuna data selezionata") } //? If a date has NOT been selected
 				}
@@ -141,7 +143,8 @@ function deleteEvent(id) {
 }
 
 function saveOnServer(url, data, callback) {
-	$.post(url, data, callback);
+	alert(url + getEventInformations(data) + callback)
+	axios({url: url, method: "post", data:{ title: data.title, start: data.start, end: data.end}});
 }
 
 /**
