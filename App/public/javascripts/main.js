@@ -1,10 +1,10 @@
 /**
- * * Global variables:
+ **Global variables:
  * @param selectedStartDate: The selected start date and time
  * @param selectedEndDate: The selected end date and time
  * @param selectedEvent: The selected event by the user
  */
-var selectedStartDate, selectedEndDate, selectedEvent = -1;
+var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#calendar').fullCalendar({
@@ -26,12 +26,20 @@ $(function () {
 		},
 
 		header: { // Header settings
-			left: 'today prev,next',
+			left: 'today prev,next debug',
 			center: 'title',
 			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
 		},
 
 		customButtons: {
+			debug: {
+				text: 'debug',
+
+				click: function () {
+					alert(debug());
+				}
+			},
+
 			/**
 			 * Adds an event on the calendar on the selecter area,
 			 * if none are given it will ask for it
@@ -43,7 +51,14 @@ $(function () {
 
 				click: function () {
 					if (isDateSelected()) { //? If a date has been selected
-						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
+						var currentEvent = {
+							title: 'Ore lavorate',
+							start: selectedStartDate,
+							end: selectedEndDate
+						}
+
+						makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
+						saveOnServer("/save", currentEvent);
 					}
 					else { alert("Nessuna data selezionata") } //? If a date has NOT been selected
 				}
@@ -52,6 +67,9 @@ $(function () {
 			/**
 			 * Removes a selected event on the calendar,
 			 * if none are given it will ask to delete all events
+			 * 
+			 * TODO: Check that an event is selected before deleting
+			 * !Otherwise it will erase all the events
 			 */
 			removeEventButton: {
 				text: '-', // Button text
@@ -90,7 +108,7 @@ $(function () {
 	});
 });
 
-//-------------------------------------------------------------------------------------//
+//-Fine impostazioni FullCalendar-------------------------------------------------------//
 
 // Checks if a date has been selected
 function isDateSelected() {
@@ -101,6 +119,10 @@ function isDateSelected() {
 function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
+
+	if (!isDateSelected()) {
+		selectedEvent = null;
+	}
 }
 
 // Creates an event on the calendar
@@ -118,13 +140,35 @@ function deleteEvent(id) {
 	$('#calendar').fullCalendar('removeEvents', id);
 }
 
-/* Debug/Test function only
+function saveOnServer(url, data, callback) {
+	$.post(url, data, callback);
+}
+
+/**
+ ** Debug/Test function only
+ */
 function debug() {
+	var events = $('#calendar').fullCalendar('clientEvents');
 	var str = "";
 
-	for (const index in selectedEvent) {
-		str += index + " - ";
+	for (const index in events) {
+		str += getEventInformations(events[index]) + " --- ";
 	}
 
 	return str;
-}*/
+}
+
+/**
+ * Because of the nature of the eventObject, in particular the resourceObject,
+ * the event cannot be read as a Json object thus i had to make this function
+ **DEBUG ONLY
+ */
+function getEventInformations(event) {
+	var str = "";
+
+	for (const index in event) {
+		str += index + ": " + event[index] + " - ";
+	}
+
+	return str;
+}
