@@ -1,6 +1,18 @@
+//-Fine delle release versione 0--------------------------------------------------------//
+
+Release 0.0.7 - FINAL VERSION:
+Completa gestione del calendario e dei suoi eventi
+Non salva i dati da nessuna parte
+Non ha distinzione tra utenti di nessun tipo
+Nessun elemento grafico personalizzato
+
+Release 0.0.6:
+Eliminazione elemento selezionato
+Bugfixing
+
 Release 0.0.5:
 Modifica eventi
-Eliminazione eventi
+Eliminazione tutti eventi
 
 Release 0.0.4:
 Creazione eventi in modo dinamico

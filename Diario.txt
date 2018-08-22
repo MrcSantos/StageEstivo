@@ -31,5 +31,13 @@
 - Messo il campo per rendere gli eventi modificabili alla creazione
 - Resi gli eventi non stackabili gli uni sugli altri
 - Primo inserimento dell'eliminazione degli eventi
+
+22 - 9
+- Creazione changelog
+- Piccolo bugfix
 - Release 0.0.6
--
+- Ricerca di una soluzione per un ID univoco per gli eventi per eliminazione
+- Eliminazione eventi completata
+- Release 0.0.7
+- Update del diario e del changelog
+- Commit finale
