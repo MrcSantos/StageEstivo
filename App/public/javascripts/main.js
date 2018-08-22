@@ -8,6 +8,7 @@ var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#calendar').fullCalendar({
+		events: "/fetch",
 		defaultView: 'agendaWeek', // Agenda view as default
 		selectable: true, // Makes the calendar selectable
 		eventOverlap: false, // Makes the events not stackable one above the other
@@ -152,6 +153,18 @@ function saveOnServer(url, data, callback) {
 		data: data
 	})
 		.then(callback)
+}
+
+function readFromServer(url) {
+	axios({
+		url: url,
+		method: "get"
+	})
+		.then(function (response) {
+			return response;
+		})
+
+	return null;
 }
 
 /**
