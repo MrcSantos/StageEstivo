@@ -1,5 +1,5 @@
 /**
- **Global variables:
+ ** Global variables:
  * @param selectedStartDate: The selected start date and time
  * @param selectedEndDate: The selected end date and time
  * @param selectedEvent: The selected event by the user
@@ -58,7 +58,7 @@ $(function () {
 						}
 
 						makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
-						saveOnServer("/save", currentEvent);
+						saveOnServer("http://http://localhost:3000/save", currentEvent);
 					}
 					else { alert("Nessuna data selezionata") } //? If a date has NOT been selected
 				}
@@ -161,7 +161,7 @@ function debug() {
 /**
  * Because of the nature of the eventObject, in particular the resourceObject,
  * the event cannot be read as a Json object thus i had to make this function
- **DEBUG ONLY
+ ** DEBUG ONLY
  */
 function getEventInformations(event) {
 	var str = "";
