@@ -56,9 +56,12 @@ $(function () {
 							start: selectedStartDate,
 							end: selectedEndDate
 						}
+						var events = $('#calendar').fullCalendar('clientEvents');
+						for (const index in events) {
+							events[index].source = undefined
+						}
 
-						saveOnServer("/save", currentEvent, function (status) {
-							alert(status);
+						saveOnServer("/save", events, function (status) {
 							makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
 						});
 					}
@@ -143,8 +146,12 @@ function deleteEvent(id) {
 }
 
 function saveOnServer(url, data, callback) {
-	alert(url + getEventInformations(data) + callback)
-	axios({url: url, method: "post", data:{ title: data.title, start: data.start, end: data.end}});
+	axios({
+		url: url,
+		method: "post",
+		data: data
+	})
+		.then(callback)
 }
 
 /**
