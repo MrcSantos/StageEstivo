@@ -1,9 +1,10 @@
 /**
- * !Global variables:
+ * * Global variables:
  * @param selectedStartDate: The selected start date and time
  * @param selectedEndDate: The selected end date and time
+ * @param selectedEvent: The selected event by the user
  */
-var selectedStartDate, selectedEndDate;
+var selectedStartDate, selectedEndDate, selectedEvent = -1;
 
 $(function () {
 	$('#calendar').fullCalendar({
@@ -49,15 +50,29 @@ $(function () {
 			},
 
 			/**
-			 * 
+			 * Removes a selected event on the calendar,
+			 * if none are given it will ask to delete all events
 			 */
 			removeEventButton: {
 				text: '-', // Button text
 
 				click: function () {
-					deleteEvent();
+					/**
+					 * Deletes the selected event only
+					 * @param _id: It's the id given to FullCalendar of the selected event
+					 */
+					deleteEvent(selectedEvent._id);
 				}
 			}
+		},
+
+		/**
+		 * When the user clicks on an event
+		 * 
+		 * TODO: Make the selected event visually different
+		 */
+		eventClick: function (eventObj) {
+			selectedEvent = eventObj;
 		},
 
 		/**
@@ -69,21 +84,27 @@ $(function () {
 			setSelected(startDate, endDate);
 		},
 		unselect: function (jsEvent, view) {
+			//unselectEvent(selectedEvent);
 			setTimeout(() => setSelected(), 500);
 		}
 	});
 });
 
-function isDateSelected() { // Checks if a date has been selected
+//-------------------------------------------------------------------------------------//
+
+// Checks if a date has been selected
+function isDateSelected() {
 	return selectedStartDate && selectedEndDate;
 }
 
-function setSelected(start, end) { // Sets the global variables values
+// Sets the global variables values
+function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
 }
 
-function makeEvent(title, start, end) { // Creates an event on the calendar
+// Creates an event on the calendar
+function makeEvent(title, start, end) {
 	$('#calendar').fullCalendar('renderEvent', {
 		title: title,
 		start: start,
@@ -92,6 +113,18 @@ function makeEvent(title, start, end) { // Creates an event on the calendar
 	});
 }
 
-function deleteEvent(asd) {
-	$('#calendar').fullCalendar('removeEvents');
+// Deletes an event on the calendar given the ID
+function deleteEvent(id) {
+	$('#calendar').fullCalendar('removeEvents', id);
 }
+
+/* Debug/Test function only
+function debug() {
+	var str = "";
+
+	for (const index in selectedEvent) {
+		str += index + " - ";
+	}
+
+	return str;
+}*/
