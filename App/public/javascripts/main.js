@@ -7,7 +7,20 @@
 var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
-	$('#calendar').fullCalendar({
+	$('#month_preview-calendar').fullCalendar({
+		height: "auto",
+		firstDay: 1, // Starts from Mon
+		events: "/fetch",
+
+		header: { // Header settings
+			left: 'title',
+			center: '',
+			right: ''
+		}
+	})
+
+	$('#agenda-calendar').fullCalendar({
+		height: "auto",
 		events: "/fetch", // Gets the events from the server from the start
 		defaultView: 'agendaWeek', // Agenda view as default
 		selectable: true, // Makes the calendar selectable
@@ -31,8 +44,24 @@ $(function () {
 			center: 'title',
 			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
 		},
+		footer: { // Header settings
+			left: '',
+			center: '',
+			right: 'toggleWeekEndDays'
+		},
 
 		customButtons: {
+
+			toggleWeekEndDays: {
+				text: "Mostra/Nascondi i weekend",
+
+				click: function () {
+					$('#agenda-calendar').fullCalendar('option', {
+						weekends: !$('#agenda-calendar').fullCalendar('option', 'weekends')
+					});					
+				}
+			},
+			
 			/**
 			 * Uses the debug function for debug purposes (DUH >.<)
 			 ** DEBUG ONLY
@@ -110,7 +139,7 @@ function updateEventsOnServer() {
  * Gets all events from calendar
  */
 function getAllEvents() {
-	var events = $('#calendar').fullCalendar('clientEvents'); // Gets all events from the calendar
+	var events = $('#agenda-calendar').fullCalendar('clientEvents'); // Gets all events from the calendar
 
 	/**
 	 * Removes the eventObject from the fetched events
@@ -148,7 +177,7 @@ function setSelected(start, end) {
  * Creates an event on the calendar
  */
 function makeEvent(title, start, end) {
-	$('#calendar').fullCalendar('renderEvent', {
+	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: title,
 		start: start,
 		end: end,
@@ -158,7 +187,7 @@ function makeEvent(title, start, end) {
 	updateEventsOnServer();
 }
 function makeEventFromEvent(event) {
-	$('#calendar').fullCalendar('renderEvent', {
+	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: event.title,
 		start: event.start,
 		end: event.end,
@@ -172,7 +201,7 @@ function makeEventFromEvent(event) {
  * Deletes an event on the calendar given the ID
  */
 function deleteEvent(id) {
-	$('#calendar').fullCalendar('removeEvents', id);
+	$('#agenda-calendar').fullCalendar('removeEvents', id);
 	updateEventsOnServer();
 }
 
