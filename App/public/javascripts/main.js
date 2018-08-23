@@ -58,10 +58,10 @@ $(function () {
 				click: function () {
 					$('#agenda-calendar').fullCalendar('option', {
 						weekends: !$('#agenda-calendar').fullCalendar('option', 'weekends')
-					});					
+					});
 				}
 			},
-			
+
 			/**
 			 * Uses the debug function for debug purposes (DUH >.<)
 			 ** DEBUG ONLY
@@ -97,7 +97,7 @@ $(function () {
 				text: '-', // Button text
 
 				click: function () {
-					if (selectedEvent) { deleteEvent(selectedEvent._id)	} //? If an event has been selected
+					if (selectedEvent) { deleteEvent(selectedEvent._id) } //? If an event has been selected
 					else { alert("Nessun evento selezionato") } //? If an event has NOT been selected
 				}
 			}
@@ -108,13 +108,13 @@ $(function () {
 		 *
 		 * TODO: Make the selected event visually different
 		 */
-		eventClick: function (eventObj) {	selectedEvent = eventObj },
+		eventClick: function (eventObj) { selectedEvent = eventObj },
 
-		eventDrop: function( event, delta, revertFunc, jsEvent, ui, view ) {
-			updateEventsOnServer();
+		eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
+			updateAll();
 		},
-		eventResize: function( event, delta, revertFunc, jsEvent, ui, view ) {
-			updateEventsOnServer();
+		eventResize: function (event, delta, revertFunc, jsEvent, ui, view) {
+			updateAll();
 		},
 
 		/**
@@ -195,7 +195,7 @@ function makeEventFromEvent(event) {
 		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
 	});
 
-	updateEventsOnServer();
+	updateAll();
 }
 
 /**

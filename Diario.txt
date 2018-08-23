@@ -57,3 +57,13 @@
 - Salvataggio quando si sposta un evento
 - Salvataggio quando si modifica un evento
 - Release 0.1.3
+- Download libreria Slds
+- Implementazione libreria
+- Inserito un secondo calendario con una preview del mese
+- Migliore suddivisione della pagina
+- Implementazione bottone per mostrare o nascondere i giorni del weekend
+- Release 0.1.4
+- Creata la funzione che prenda gli eventi subito dopo aver scritto
+- Implementazione aggiornamento calendari
+- Ora i calendari si aggiornano in tempo reale
+- Release 0.1.5
