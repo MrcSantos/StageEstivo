@@ -49,3 +49,11 @@
 - Release 0.1.1
 - Creato metodo per leggere i dati dal server
 - Release 0.1.2
+
+23 - 9
+- Ridefinito il progetto su Trello
+- Salvataggio sul server quando si aggiunge un evento
+- Salvataggio quando si rimuove un evento
+- Salvataggio quando si sposta un evento
+- Salvataggio quando si modifica un evento
+- Release 0.1.3
