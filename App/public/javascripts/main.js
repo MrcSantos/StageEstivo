@@ -8,7 +8,7 @@ var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#calendar').fullCalendar({
-		events: "/fetch",
+		events: "/fetch", // Gets the events from the server from the start
 		defaultView: 'agendaWeek', // Agenda view as default
 		selectable: true, // Makes the calendar selectable
 		eventOverlap: false, // Makes the events not stackable one above the other
@@ -27,24 +27,26 @@ $(function () {
 		},
 
 		header: { // Header settings
-			left: 'today prev,next debug',
+			left: 'today prev,next',
 			center: 'title',
 			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
 		},
 
 		customButtons: {
+			/**
+			 * Uses the debug function for debug purposes (DUH >.<)
+			 ** DEBUG ONLY
+			 */
 			debug: {
 				text: 'debug',
 
-				click: function () {
-					alert(debug());
-				}
+				click: function () { alert(debug()) }
 			},
 
 			/**
 			 * Adds an event on the calendar on the selecter area,
 			 * if none are given it will ask for it
-			 * 
+			 *
 			 * TODO: Do not overlap events when created
 			 */
 			addEventButton: {
@@ -52,19 +54,7 @@ $(function () {
 
 				click: function () {
 					if (isDateSelected()) { //? If a date has been selected
-						var currentEvent = {
-							title: 'Ore lavorate',
-							start: selectedStartDate,
-							end: selectedEndDate
-						}
-						var events = $('#calendar').fullCalendar('clientEvents');
-						for (const index in events) {
-							events[index].source = undefined
-						}
-
-						saveOnServer("/save", events, function (status) {
-							makeEvent(currentEvent.title, currentEvent.start, currentEvent.end); // Creates an event on the calendar
-						});
+						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
 					}
 					else { alert("Nessuna data selezionata") } //? If a date has NOT been selected
 				}
@@ -72,31 +62,30 @@ $(function () {
 
 			/**
 			 * Removes a selected event on the calendar,
-			 * if none are given it will ask to delete all events
-			 * 
-			 * TODO: Check that an event is selected before deleting
-			 * !Otherwise it will erase all the events
+			 * if none are given it will ask for it
 			 */
 			removeEventButton: {
 				text: '-', // Button text
 
 				click: function () {
-					/**
-					 * Deletes the selected event only
-					 * @param _id: It's the id given to FullCalendar of the selected event
-					 */
-					deleteEvent(selectedEvent._id);
+					if (selectedEvent) { deleteEvent(selectedEvent._id)	} //? If an event has been selected
+					else { alert("Nessun evento selezionato") } //? If an event has NOT been selected
 				}
 			}
 		},
 
 		/**
 		 * When the user clicks on an event
-		 * 
+		 *
 		 * TODO: Make the selected event visually different
 		 */
-		eventClick: function (eventObj) {
-			selectedEvent = eventObj;
+		eventClick: function (eventObj) {	selectedEvent = eventObj },
+
+		eventDrop: function( event, delta, revertFunc, jsEvent, ui, view ) {
+			updateEventsOnServer();
+		},
+		eventResize: function( event, delta, revertFunc, jsEvent, ui, view ) {
+			updateEventsOnServer();
 		},
 
 		/**
@@ -104,24 +93,48 @@ $(function () {
 		 * Sets the two global variable to correct data format when selected
 		 * Resets the two global variable when deselected
 		 */
-		select: function (startDate, endDate) {
-			setSelected(startDate, endDate);
-		},
-		unselect: function (jsEvent, view) {
-			//unselectEvent(selectedEvent);
-			setTimeout(() => setSelected(), 500);
-		}
+		select: function (startDate, endDate) { setSelected(startDate, endDate) },
+		unselect: function (jsEvent, view) { setTimeout(() => setSelected(), 500) }
 	});
 });
 
 //-Fine impostazioni FullCalendar-------------------------------------------------------//
 
-// Checks if a date has been selected
+function updateEventsOnServer() {
+	var events = getAllEvents();
+
+	saveOnServer("/save", events);
+}
+
+/**
+ * Gets all events from calendar
+ */
+function getAllEvents() {
+	var events = $('#calendar').fullCalendar('clientEvents'); // Gets all events from the calendar
+
+	/**
+	 * Removes the eventObject from the fetched events
+	 * because it's a cyclic Json
+	 * when an event is created from the calendar
+	 * and it causes bugs
+	 */
+	for (const index in events) {
+		events[index].source = undefined;
+	}
+
+	return events;
+}
+
+/**
+ * Checks if a date has been selected
+ */
 function isDateSelected() {
 	return selectedStartDate && selectedEndDate;
 }
 
-// Sets the global variables values
+/**
+ * Sets the global variables values
+ */
 function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
@@ -131,7 +144,9 @@ function setSelected(start, end) {
 	}
 }
 
-// Creates an event on the calendar
+/**
+ * Creates an event on the calendar
+ */
 function makeEvent(title, start, end) {
 	$('#calendar').fullCalendar('renderEvent', {
 		title: title,
@@ -139,11 +154,26 @@ function makeEvent(title, start, end) {
 		end: end,
 		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
 	});
+
+	updateEventsOnServer();
+}
+function makeEventFromEvent(event) {
+	$('#calendar').fullCalendar('renderEvent', {
+		title: event.title,
+		start: event.start,
+		end: event.end,
+		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
+	});
+
+	updateEventsOnServer();
 }
 
-// Deletes an event on the calendar given the ID
+/**
+ * Deletes an event on the calendar given the ID
+ */
 function deleteEvent(id) {
 	$('#calendar').fullCalendar('removeEvents', id);
+	updateEventsOnServer();
 }
 
 function saveOnServer(url, data, callback) {
@@ -168,10 +198,11 @@ function readFromServer(url) {
 }
 
 /**
- ** Debug/Test function only
+ * Debug/Test function
+ ** DEBUG ONLY
  */
 function debug() {
-	var events = $('#calendar').fullCalendar('clientEvents');
+	var events = getAllEvents();
 	var str = "";
 
 	for (const index in events) {

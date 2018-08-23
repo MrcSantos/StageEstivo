@@ -6,10 +6,8 @@ var bp = require('body-parser');
 const bodyParser = bp.urlencoded({ extended: false }); // Used to parse client data
 
 router.get('/', function (req, res, next) {
-	console.log("Spedizione...");
-	
-	fs.readFile('DummyTest.txt', function (err, data) {
-		res.send(data);
+	fs.readFile('DummyTest.txt', function (err, data) { // Reads data from the txt file
+		res.send(data); // Sends the read data
 	});
 });
 
