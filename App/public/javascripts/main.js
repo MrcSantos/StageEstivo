@@ -129,10 +129,10 @@ $(function () {
 
 //-Fine impostazioni FullCalendar-------------------------------------------------------//
 
-function updateEventsOnServer() {
+function updateEventsOnServer(callback) {
 	var events = getAllEvents();
 
-	saveOnServer("/save", events);
+	saveOnServer("/save", events, callback);
 }
 
 /**
@@ -184,8 +184,9 @@ function makeEvent(title, start, end) {
 		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
 	});
 
-	updateEventsOnServer();
+	updateAll();
 }
+
 function makeEventFromEvent(event) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: event.title,
@@ -202,16 +203,23 @@ function makeEventFromEvent(event) {
  */
 function deleteEvent(id) {
 	$('#agenda-calendar').fullCalendar('removeEvents', id);
-	updateEventsOnServer();
+	updateAll();
+}
+function updateAll() {
+	updateEventsOnServer(updateCalendars);
 }
 
+function updateCalendars() {
+	$('#agenda-calendar').fullCalendar('refetchEvents');
+	$('#month_preview-calendar').fullCalendar('refetchEvents');
+}
 function saveOnServer(url, data, callback) {
 	axios({
 		url: url,
 		method: "post",
 		data: data
 	})
-		.then(callback)
+		.then(callback);
 }
 
 function readFromServer(url) {

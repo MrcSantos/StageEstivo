@@ -22,3 +22,8 @@ public static void salva(list<Evento> eventi);
  * @param fine: La data e l'orario di fine
  */
 public static list<Evento> leggi(int|String inizio, int|String fine);
+
+/**
+ * Fornisce gli eventi di default per essere poi modificati e poi risalvato come default
+ */
+public static list<Evento> editDefaultWeekHours();
