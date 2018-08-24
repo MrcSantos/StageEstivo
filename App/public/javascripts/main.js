@@ -151,8 +151,7 @@ $(function () {
 
 		/**
 		 * When the user clicks on an event
-		 *
-		 * TODO: Make the selected event visually different
+		 * Makes the selected event visually different
 		 */
 		eventClick: function (eventObj) {
 			selectedEvent = eventObj;
@@ -173,7 +172,8 @@ $(function () {
 		 * Sets the two global variable to correct data format when selected
 		 * Resets the two global variable when deselected
 		 */
-		select: function (startDate, endDate) { setSelected(startDate, endDate) },
+		select: function (startDate, endDate) { setSelected(startDate, endDate) 
+		makeEvent('Ore lavorate', startDate, endDate)},
 		unselect: function (jsEvent, view) { setTimeout(() => setSelected(), 500) }
 	});
 });
@@ -218,10 +218,6 @@ function isDateSelected() {
 function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
-
-	if (!isDateSelected()) {
-		selectedEvent = null;
-	}
 }
 
 /**
