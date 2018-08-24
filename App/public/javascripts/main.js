@@ -8,6 +8,8 @@ var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#month_preview-calendar').fullCalendar({
+		editable: false, // Makes the calendar non-editable
+		weekends: false,
 		locale: "it",
 		height: "auto",
 		events: "/fetch",
@@ -15,11 +17,12 @@ $(function () {
 		header: { // Header settings
 			left: 'title',
 			center: '',
-			right: ''
+			right: 'prev,next'
 		}
 	})
 
 	$('#agenda-calendar').fullCalendar({
+		editable: true, // Makes the calendar non-editable
 		weekends: false,
 		locale: "it",
 		height: "auto",
@@ -59,6 +62,9 @@ $(function () {
 				click: function () {
 					$('#agenda-calendar').fullCalendar('option', {
 						weekends: !$('#agenda-calendar').fullCalendar('option', 'weekends')
+					});
+					$('#month_preview-calendar').fullCalendar('option', {
+						weekends: !$('#month_preview-calendar').fullCalendar('option', 'weekends')
 					});
 				}
 			},
@@ -109,7 +115,9 @@ $(function () {
 		 *
 		 * TODO: Make the selected event visually different
 		 */
-		eventClick: function (eventObj) { selectedEvent = eventObj },
+		eventClick: function (eventObj) {
+			selectedEvent = eventObj;
+		},
 
 		eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
 			updateAll();
@@ -181,8 +189,7 @@ function makeEvent(title, start, end) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: title,
 		start: start,
-		end: end,
-		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
+		end: end
 	});
 
 	updateAll();
@@ -192,8 +199,7 @@ function makeEventFromEvent(event) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: event.title,
 		start: event.start,
-		end: event.end,
-		editable: true, // Makes the event editable (drag, drop and extend/reduce time)
+		end: event.end
 	});
 
 	updateAll();
