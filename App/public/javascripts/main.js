@@ -8,8 +8,8 @@ var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#month_preview-calendar').fullCalendar({
+		locale: "it",
 		height: "auto",
-		firstDay: 1, // Starts from Mon
 		events: "/fetch",
 
 		header: { // Header settings
@@ -20,6 +20,8 @@ $(function () {
 	})
 
 	$('#agenda-calendar').fullCalendar({
+		weekends: false,
+		locale: "it",
 		height: "auto",
 		events: "/fetch", // Gets the events from the server from the start
 		defaultView: 'agendaWeek', // Agenda view as default
@@ -27,7 +29,6 @@ $(function () {
 		eventOverlap: false, // Makes the events not stackable one above the other
 		allDaySlot: false, // Removes the all-day events slot
 		nowIndicator: true, // Shows current date/time indicator
-		firstDay: 1, // Starts from Mon
 
 		minTime: '07:00:00', // Shows day from 7:00
 		maxTime: '20:00:00', // to 20:00
