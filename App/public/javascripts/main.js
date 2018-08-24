@@ -8,8 +8,10 @@ var selectedStartDate, selectedEndDate, selectedEvent = null;
 
 $(function () {
 	$('#month_preview-calendar').fullCalendar({
+		themeSystem: 'bootstrap4',
 		editable: false, // Makes the calendar non-editable
 		weekends: false,
+		titleFormat: 'MMM YYYY',
 		locale: "it",
 		height: "auto",
 		events: "/fetch",
@@ -17,12 +19,34 @@ $(function () {
 		header: { // Header settings
 			left: 'title',
 			center: '',
-			right: 'prev,next'
-		}
+			right: 'pre,nex'
+		},
+
+		customButtons: {
+
+			pre: {
+				text: "<",
+				click: function () {
+					$('#month_preview-calendar').fullCalendar('prev');
+				}
+			},
+			nex: {
+				text: ">",
+				click: function () {
+					$('#month_preview-calendar').fullCalendar('next');
+				}
+			}
+		},
+		
+		navLinks: true,
+		navLinkDayClick: function (date, jsEvent) {
+			$('#agenda-calendar').fullCalendar('gotoDate', date);
+		}		
 	})
 
 	$('#agenda-calendar').fullCalendar({
-		editable: true, // Makes the calendar non-editable
+		themeSystem: 'bootstrap4',
+		editable: true, // Makes the calendar editable
 		weekends: false,
 		locale: "it",
 		height: "auto",
@@ -44,7 +68,7 @@ $(function () {
 		},
 
 		header: { // Header settings
-			left: 'today prev,next',
+			left: 'today pre,nex',
 			center: 'title',
 			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
 		},
@@ -56,6 +80,20 @@ $(function () {
 
 		customButtons: {
 
+			pre: {
+				text: "<",
+				click: function () {
+					$('#agenda-calendar').fullCalendar('prev');
+					$('#month_preview-calendar').fullCalendar('gotoDate', $('#agenda-calendar').fullCalendar('getDate'))
+				}
+			},
+			nex: {
+				text: ">",
+				click: function () {
+					$('#agenda-calendar').fullCalendar('next');
+					$('#month_preview-calendar').fullCalendar('gotoDate', $('#agenda-calendar').fullCalendar('getDate'))
+				}
+			},
 			toggleWeekEndDays: {
 				text: "Mostra/Nascondi i weekend",
 

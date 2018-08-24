@@ -4,21 +4,21 @@
  * @param inizio: La data e l'orario di inizio
  * @param fine: La data e l'orario di fine
  */
-public static Record leggi(int|String inizio, int|String fine);
+public static Record leggi(String ownerId, int|String inizio, int|String fine);
 
 /**
- * Modifica il record vecchio con quello nuovo
+ * Modifica il record vecchio con quello nuovo tramite l'id
  * 
- * @param evento: Evento da modificare, passato tramite la chiamata al server
+ * @param nuovo: Evento da modificare, passato tramite la chiamata al server
  */
-public static void salva(Record vecchio, Record nuovo);
+public static void salva(Record nuovo);
 
 
 
 /**
  * Fornisce il Json di default
  */
-public static Json leggiTemplate();
+public static Json leggiTemplate(String ownerId);
 
 /**
  * Salva il Json ottenuto come template di default
@@ -28,7 +28,7 @@ public static void scriviTemplate(JSON template);
 
 
 /**
- * La classe Evento dovrà contenere al minimo queste cose
+ * La classe Evento dovrà contenere al minimo queste variabili
  */
 public class Evento {
 	id:String // Id incrementale fornito dal database
@@ -39,7 +39,7 @@ public class Evento {
 	isRemote:boolean // Se il lavoro è remoto
 }
 
-/** NON SO SE SI FACCIA COSÌ IL PROTOTIPO DI UN RECORD
+/**
  * Il record dovrà restituire al minimo l'evento richiesto
  */
 public class Record {
