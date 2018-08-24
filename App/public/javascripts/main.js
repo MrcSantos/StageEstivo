@@ -4,7 +4,7 @@
  * @param selectedEndDate: The selected end date and time
  * @param selectedEvent: The selected event by the user
  */
-var selectedStartDate, selectedEndDate, selectedEvent = null;
+var selectedStartDate, selectedEndDate, selectedEvent = null, pastSelectedEvent;
 
 $(function () {
 	$('#month_preview-calendar').fullCalendar({
@@ -45,6 +45,7 @@ $(function () {
 	})
 
 	$('#agenda-calendar').fullCalendar({
+		titleFormat: 'DD MMMM YYYY',
 		themeSystem: 'bootstrap4',
 		editable: true, // Makes the calendar editable
 		weekends: false,
@@ -155,6 +156,9 @@ $(function () {
 		 */
 		eventClick: function (eventObj) {
 			selectedEvent = eventObj;
+			$(pastSelectedEvent).css('border-color', '');
+			$(this).css('border-color', 'red');
+			pastSelectedEvent = $(this);
 		},
 
 		eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
