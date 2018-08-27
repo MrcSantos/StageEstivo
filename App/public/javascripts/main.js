@@ -11,7 +11,6 @@ $(function () {
 		editable: false, // Makes the calendar non-editable
 		weekends: false,
 		titleFormat: 'MMM YYYY',
-		locale: "it",
 		height: "auto",
 		events: "/fetch",
 
@@ -47,7 +46,6 @@ $(function () {
 		titleFormat: 'DD MMMM YYYY',
 		editable: true, // Makes the calendar editable
 		weekends: false,
-		locale: "it",
 		height: "auto",
 		events: "/fetch", // Gets the events from the server from the start
 		defaultView: 'agendaWeek', // Agenda view as default
@@ -106,7 +104,7 @@ $(function () {
 				}
 			},
 			toggleCalendarView: {
-				text: "Mostra settimana/giorno",
+				text: "Show week/day",
 
 				click: function () {
 					if($('#agenda-calendar').fullCalendar("getView").viewSpec.type == "agendaWeek") {
@@ -141,7 +139,7 @@ $(function () {
 					if (isDateSelected()) { //? If a date has been selected
 						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
 					}
-					else { alert("Nessuna data selezionata") } //? If a date has NOT been selected
+					else { alert("No date selected") } //? If a date has NOT been selected
 				}
 			},
 
@@ -154,7 +152,7 @@ $(function () {
 
 				click: function () {
 					if (selectedEvent) { deleteEvent(selectedEvent._id) } //? If an event has been selected
-					else { alert("Nessun evento selezionato") } //? If an event has NOT been selected
+					else { alert("No selected event") } //? If an event has NOT been selected
 				}
 			}
 		},
@@ -237,9 +235,8 @@ function makeEvent(title, start, end) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: title,
 		start: start,
-		end: end,
-		eventBackgroundColor: "#00a1e0"
-	});
+		end: end
+		});
 
 	updateAll();
 }
@@ -248,9 +245,8 @@ function makeEventFromEvent(event) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: event.title,
 		start: event.start,
-		end: event.end,
-		eventBackgroundColor: "#00a1e0"
-	});
+		end: event.end
+		});
 
 	updateAll();
 }
