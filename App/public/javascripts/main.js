@@ -8,7 +8,6 @@ var selectedStartDate, selectedEndDate, selectedEvent = null, pastSelectedEvent;
 
 $(function () {
 	$('#month_preview-calendar').fullCalendar({
-		themeSystem: 'bootstrap4',
 		editable: false, // Makes the calendar non-editable
 		weekends: false,
 		titleFormat: 'MMM YYYY',
@@ -46,7 +45,6 @@ $(function () {
 
 	$('#agenda-calendar').fullCalendar({
 		titleFormat: 'DD MMMM YYYY',
-		themeSystem: 'bootstrap4',
 		editable: true, // Makes the calendar editable
 		weekends: false,
 		locale: "it",
@@ -69,14 +67,14 @@ $(function () {
 		},
 
 		header: { // Header settings
-			left: 'today pre,nex',
-			center: 'title',
-			right: 'addEventButton,removeEventButton agendaWeek,agendaDay'
+			left: 'today title',
+			center: '',
+			right: 'removeEventButton pre,nex'
 		},
-		footer: { // Header settings
+		footer: { // Footer settings
 			left: '',
 			center: '',
-			right: 'toggleWeekEndDays'
+			right: 'toggleCalendarView toggleWeekEndDays'
 		},
 
 		customButtons: {
@@ -105,6 +103,18 @@ $(function () {
 					$('#month_preview-calendar').fullCalendar('option', {
 						weekends: !$('#month_preview-calendar').fullCalendar('option', 'weekends')
 					});
+				}
+			},
+			toggleCalendarView: {
+				text: "Mostra settimana/giorno",
+
+				click: function () {
+					if($('#agenda-calendar').fullCalendar("getView").viewSpec.type == "agendaWeek") {
+						$('#agenda-calendar').fullCalendar('changeView', 'agendaDay');
+					}
+					else {
+						$('#agenda-calendar').fullCalendar('changeView', 'agendaWeek');
+					}
 				}
 			},
 
@@ -227,7 +237,8 @@ function makeEvent(title, start, end) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: title,
 		start: start,
-		end: end
+		end: end,
+		eventBackgroundColor: "#00a1e0"
 	});
 
 	updateAll();
@@ -237,7 +248,8 @@ function makeEventFromEvent(event) {
 	$('#agenda-calendar').fullCalendar('renderEvent', {
 		title: event.title,
 		start: event.start,
-		end: event.end
+		end: event.end,
+		eventBackgroundColor: "#00a1e0"
 	});
 
 	updateAll();
