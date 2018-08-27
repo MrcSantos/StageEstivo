@@ -1,3 +1,13 @@
+//-Sospensione delle release versione 1--------------------------------------------------------//
+
+Release 0.1.11:
+La grafica è stata ottimizzata per funzionare su SalesForce
+Sospensione release V. 1 a causa di chiamate al server SalesForce non ultimate
+
+.
+. Varie release di implementazioni grafiche e di compatibilità con SalesForce
+.
+
 Release 0.1.5:
 La preview si aggiorna in tempo reale quando si modificano gli eventi
 
