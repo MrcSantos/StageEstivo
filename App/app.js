@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var saveRouter = require('./routes/save');
 var fetchRouter = require('./routes/fetch');
+var deleteRouter = require('./routes/delete');
 
 var app = express();
 
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter); // Index
 app.use('/save', saveRouter); // Saves info in a txt file
+app.use('/delete', deleteRouter); // Saves info in a txt file
 app.use('/fetch', fetchRouter); // Reads from the txt file and sends it
 
 // catch 404 and forward to error handler

@@ -13,6 +13,21 @@ var selectedStartDate = null, selectedEndDate = null, selectedEvent = null, past
  */
 var preCal, mainCal;
 
+function init() {
+	readFromServer("/fetch/template", (res) => {
+		res = res.data;
+		console.log();
+
+		for (const index in res) {
+			console.log(res[index].start);
+
+			res[index].start = mainCal.fullCalendar("getDate").startOf("week").add(index, "days").add(moment(res[index].start), "h")
+			console.log(res[index].start);
+		}
+	})
+
+}
+
 $(() => {
 	preCal = $('#month_preview-calendar');
 	mainCal = $('#agenda-calendar');
@@ -115,6 +130,7 @@ $(() => {
 				text: "<", // Button text
 
 				click: () => {
+					init()
 					mainCal.fullCalendar('prev'); // Goes to the previous date
 					preCal.fullCalendar('gotoDate', mainCal.fullCalendar('getDate')); // Makes the preview go to the changed date
 				}
@@ -171,7 +187,7 @@ $(() => {
 				text: '-', // Button text
 
 				click: function () {
-					if (selectedEvent) { deleteEvent(selectedEvent._id) }
+					if (selectedEvent) { deleteEvent(selectedEvent) }
 					else { alert("No selected event") }
 				}
 			}
@@ -217,6 +233,8 @@ $(() => {
 		 */
 		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
 	});
+
+	init();
 });
 
 //-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
@@ -241,9 +259,10 @@ function makeEvent(title, start, end) {
  *
  * TODO: update the information on the server only of the deleted event
  */
-function deleteEvent(id) {
-	mainCal.fullCalendar('removeEvents', id);
-	updateAll();
+function deleteEvent(event) {
+	console.log(event);
+	mainCal.fullCalendar('removeEvents', event._id);
+	writeOnServer("/delete", event);
 }
 
 /**
@@ -300,18 +319,18 @@ function updateCalendars() {
 function updateEventsOnServer(callback) {
 	var events = getAllEvents();
 
-	saveOnServer("/save", events, callback);
+	writeOnServer("/save", events, callback);
 }
 
 
 /**
- * Saves data on the server
+ * Saves the data on the server
  * 
  * @param url The server url
  * @param data The data that needs to be sent
  * @param callback The callback function, executed after the call has been made
  */
-function saveOnServer(url, data, callback) {
+function writeOnServer(url, data, callback) {
 	/**
 	 * Axios POST call with the data
 	 */
@@ -330,7 +349,7 @@ function saveOnServer(url, data, callback) {
  * 
  * TODO: Specify the start date and the end date
  */
-function readFromServer(url) {
+function readFromServer(url, callback) {
 	/**
 	 * Axios GET call from the server
 	 */
@@ -338,7 +357,5 @@ function readFromServer(url) {
 		url: url,
 		method: "get"
 	})
-		.then((response) => { return response }) // Returns the response from the server
-
-	return null;
+		.then(callback) // Returns the response from the server
 }

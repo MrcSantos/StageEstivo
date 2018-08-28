@@ -25,12 +25,12 @@ router.get('/', function (req, res, next) {
 			res.send(read);
 		}, 1000)
 	});
-
-
-
-	/*fs.readFile('DummyTest.txt', function (err, data) { // Reads data from the txt file
-		res.send(data); // Sends the read data
-	});*/
 });
+
+router.get('/template', function (req, res, next) {
+	fs.readFile('Preset.json', function (err, data) { // Reads data from the txt file		
+		res.send(data); // Sends the read data
+	});
+})
 
 module.exports = router;
