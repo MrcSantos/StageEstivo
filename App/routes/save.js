@@ -6,7 +6,12 @@ var bp = require('body-parser');
 const bodyParser = bp.urlencoded({ extended: false }); // Used to parse client data
 
 router.post('/', bodyParser, function (req, res, next) {
-	fs.writeFile("DummyTest.txt", JSON.stringify(req.body)); // Writes data in the txt file
+	req = req.body;
+
+
+	fs.writeFile("./records/" + req._id + ".txt", JSON.stringify(req), {}, () => { }); // Writes data in the txt file
+
+
 	res.sendStatus(200);
 });
 

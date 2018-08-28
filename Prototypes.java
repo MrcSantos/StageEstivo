@@ -44,4 +44,5 @@ public class Evento {
  */
 public class Record {
 	evento:Evento
+	isProprietario:boolean // Se l'user è proprietario del record 
 }

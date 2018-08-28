@@ -1,204 +1,266 @@
 /**
  ** Global variables:
- * @param selectedStartDate: The selected start date and time
- * @param selectedEndDate: The selected end date and time
- * @param selectedEvent: The selected event by the user
+ * @param selectedStartDate The selected start date and time
+ * @param selectedEndDate The selected end date and time
+ * @param selectedEvent The selected event by the user
  */
-var selectedStartDate, selectedEndDate, selectedEvent = null, pastSelectedEvent;
+var selectedStartDate = null, selectedEndDate = null, selectedEvent = null, pastSelectedEvent = null;
 
-$(function () {
-	$('#month_preview-calendar').fullCalendar({
+/**
+ ** Gets the calendars
+ * @param preCal The small calendar which serves as preview of the current or selected date
+ * @param mainCal The main calendar in which you can modify the events
+ */
+var preCal, mainCal;
+
+$(() => {
+	preCal = $('#month_preview-calendar');
+	mainCal = $('#agenda-calendar');
+
+	/**
+	 * Renders the calendar with the options
+	 */
+	preCal.fullCalendar({
+		defaultView: 'month', // Month view as default
+		weekends: false, // Hides the weekend days
+		firstDay: 1, // Monday as first day
+		titleFormat: 'MMM YYYY', // Edits the title date format
+		height: "auto", // Automatically adapts the calendar to the correct height
+
+		events: "/fetch", // TODO: Take the events from SalesForce database
 		editable: false, // Makes the calendar non-editable
-		weekends: false,
-		titleFormat: 'MMM YYYY',
-		height: "auto",
-		events: "/fetch",
 
-		header: { // Header settings
-			left: 'title',
+		/**
+		 * Header settings
+		 */
+		header: {
+			left: 'title', // Displays the scoped date on the left
 			center: '',
-			right: 'pre,nex'
+			right: 'pre,nex' // Displays the two custom buttons
 		},
 
+		/**
+		 * Custom buttons settings
+		 */
 		customButtons: {
-
 			pre: {
-				text: "<",
-				click: function () {
-					$('#month_preview-calendar').fullCalendar('prev');
-				}
+				text: "<", // Button text
+
+				click: () => { preCal.fullCalendar('prev') } // Goes to the previous date
 			},
+
 			nex: {
-				text: ">",
-				click: function () {
-					$('#month_preview-calendar').fullCalendar('next');
-				}
+				text: ">", // Button text
+				click: () => { preCal.fullCalendar('next') } // Goes to the next date
 			}
 		},
-		
-		navLinks: true,
-		navLinkDayClick: function (date, jsEvent) {
-			$('#agenda-calendar').fullCalendar('gotoDate', date);
-		}		
+
+		navLinks: true, // Enables clickable day number
+		navLinkDayClick: (date) => { mainCal.fullCalendar('gotoDate', date) } // Makes the main calendar go to the selected date on the preview calendar
 	})
 
-	$('#agenda-calendar').fullCalendar({
-		titleFormat: 'DD MMMM YYYY',
-		editable: true, // Makes the calendar editable
-		weekends: false,
-		height: "auto",
-		events: "/fetch", // Gets the events from the server from the start
+	/**
+	 * Renders the calendar with the options
+	 */
+	mainCal.fullCalendar({
 		defaultView: 'agendaWeek', // Agenda view as default
+		weekends: false, // Hides the weekend days
+		firstDay: 1, // Monday as first day
+		editable: true, // Makes the calendar edit the events
 		selectable: true, // Makes the calendar selectable
-		eventOverlap: false, // Makes the events not stackable one above the other
+		height: "auto", // Automatically adapts the calendar to the correct height
+		titleFormat: 'DD MMMM YYYY', // Edits the title date format
 		allDaySlot: false, // Removes the all-day events slot
 		nowIndicator: true, // Shows current date/time indicator
+
+		eventOverlap: false, // Makes the events not stackable one above the other
+		events: "/fetch", // TODO: Take the events from SalesForce database
 
 		minTime: '07:00:00', // Shows day from 7:00
 		maxTime: '20:00:00', // to 20:00
 
-		businessHours: { // Darkens the area outside the work our in order to focus
+		/**
+		 * Darkens the area outside the work our in order to focus
+		 */
+		businessHours: {
 			dow: [1, 2, 3, 4, 5], // Monday - Friday
 
 			start: '9:00', // a start time
 			end: '18:00', // an end time
 		},
 
-		header: { // Header settings
-			left: 'today title',
+		/**
+		 * Header settings
+		 */
+		header: {
+			left: 'today title', // Shows the "today" button current scoped date
 			center: '',
-			right: 'removeEventButton pre,nex'
+			right: 'removeEventButton pre,nex' // Shows the custom buttons
 		},
-		footer: { // Footer settings
+
+		/**
+		 * footer settings
+		 */
+		footer: {
 			left: '',
 			center: '',
-			right: 'toggleCalendarView toggleWeekEndDays'
+			right: 'toggleCalendarView toggleWeekEndDays' // Shows the custom buttons
 		},
 
+		/**
+		 * Custom buttons settings
+		 */
 		customButtons: {
-
 			pre: {
-				text: "<",
-				click: function () {
-					$('#agenda-calendar').fullCalendar('prev');
-					$('#month_preview-calendar').fullCalendar('gotoDate', $('#agenda-calendar').fullCalendar('getDate'))
+				text: "<", // Button text
+
+				click: () => {
+					mainCal.fullCalendar('prev'); // Goes to the previous date
+					preCal.fullCalendar('gotoDate', mainCal.fullCalendar('getDate')); // Makes the preview go to the changed date
 				}
 			},
+
 			nex: {
-				text: ">",
-				click: function () {
-					$('#agenda-calendar').fullCalendar('next');
-					$('#month_preview-calendar').fullCalendar('gotoDate', $('#agenda-calendar').fullCalendar('getDate'))
+				text: ">", // Button text
+
+				click: () => {
+					mainCal.fullCalendar('next'); // Goes to the next date
+					preCal.fullCalendar('gotoDate', mainCal.fullCalendar('getDate')); // Makes the preview go to the changed date
 				}
 			},
+
+			/**
+			 * Toggles the current weekend settings, from hidden to shown and vice versa
+			 */
 			toggleWeekEndDays: {
-				text: "Mostra/Nascondi i weekend",
+				text: "Mostra/Nascondi i weekend", // Button text
 
-				click: function () {
-					$('#agenda-calendar').fullCalendar('option', {
-						weekends: !$('#agenda-calendar').fullCalendar('option', 'weekends')
-					});
-					$('#month_preview-calendar').fullCalendar('option', {
-						weekends: !$('#month_preview-calendar').fullCalendar('option', 'weekends')
-					});
+				click: () => {
+					var weekendsOption = mainCal.fullCalendar('option', 'weekends'); // Gets the current weekend option
+
+					/**
+					 * Sets the opposite of the option for both calendars
+					 */
+					mainCal.fullCalendar('option', { weekends: !weekendsOption });
+					preCal.fullCalendar('option', { weekends: !weekendsOption });
 				}
 			},
+
+			/**
+			 * Toggles the current calendar view, from week to day and vice versa
+			 */
 			toggleCalendarView: {
-				text: "Show week/day",
+				text: "Show week/day", // Button text
 
-				click: function () {
-					if($('#agenda-calendar').fullCalendar("getView").viewSpec.type == "agendaWeek") {
-						$('#agenda-calendar').fullCalendar('changeView', 'agendaDay');
-					}
-					else {
-						$('#agenda-calendar').fullCalendar('changeView', 'agendaWeek');
-					}
-				}
-			},
+				click: () => {
+					var currentView = mainCal.fullCalendar("getView").viewSpec.type; // Gets the current view
 
-			/**
-			 * Uses the debug function for debug purposes (DUH >.<)
-			 ** DEBUG ONLY
-			 */
-			debug: {
-				text: 'debug',
-
-				click: function () { alert(debug()) }
-			},
-
-			/**
-			 * Adds an event on the calendar on the selecter area,
-			 * if none are given it will ask for it
-			 *
-			 * TODO: Do not overlap events when created
-			 */
-			addEventButton: {
-				text: '+', // Button text
-
-				click: function () {
-					if (isDateSelected()) { //? If a date has been selected
-						makeEvent('Ore lavorate', selectedStartDate, selectedEndDate); // Creates an event on the calendar
-					}
-					else { alert("No date selected") } //? If a date has NOT been selected
+					/**
+					 * Changes the current view based on the current one
+					 */
+					if (currentView == "agendaWeek") { mainCal.fullCalendar('changeView', 'agendaDay') }
+					else { mainCal.fullCalendar('changeView', 'agendaWeek') }
 				}
 			},
 
 			/**
 			 * Removes a selected event on the calendar,
-			 * if none are given it will ask for it
+			 * if none are given it will notify it
 			 */
 			removeEventButton: {
 				text: '-', // Button text
 
 				click: function () {
-					if (selectedEvent) { deleteEvent(selectedEvent._id) } //? If an event has been selected
-					else { alert("No selected event") } //? If an event has NOT been selected
+					if (selectedEvent) { deleteEvent(selectedEvent._id) }
+					else { alert("No selected event") }
 				}
 			}
 		},
 
+		// Event listeners
+
 		/**
-		 * When the user clicks on an event
 		 * Makes the selected event visually different
+		 * when the user clicks on an event
 		 */
-		eventClick: function (eventObj) {
-			selectedEvent = eventObj;
-			$(pastSelectedEvent).css('border-color', '');
-			$(this).css('border-color', 'red');
+		eventClick: function (currentEvent) {
+			selectedEvent = currentEvent;
+			selectEvent(this);	// Select effect on the current event	
 			pastSelectedEvent = $(this);
 		},
 
-		eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
-			updateAll();
-		},
-		eventResize: function (event, delta, revertFunc, jsEvent, ui, view) {
-			updateAll();
+		/**
+		 * When an event has been dropped
+		 * 
+		 * TODO: Make the calls to update correctly only the modified event
+		 */
+		eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+
+		/**
+		 * When an event has been resized
+		 * 
+		 * TODO: Make the calls to update correctly only the modified event
+		 */
+		eventResize: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+
+		/**
+		 * Sets the two global variable to correct data format when selected
+		 * and renders the event
+		 */
+		select: (startDate, endDate) => {
+			setSelected(startDate, endDate);
+			makeEvent('Ore lavorate', startDate, endDate);
 		},
 
 		/**
-		 * Select and unselect event handlers
-		 * Sets the two global variable to correct data format when selected
-		 * Resets the two global variable when deselected
+		 * Resets the two global variable when deselected (with a delay)
 		 */
-		select: function (startDate, endDate) { setSelected(startDate, endDate) 
-		makeEvent('Ore lavorate', startDate, endDate)},
-		unselect: function (jsEvent, view) { setTimeout(() => setSelected(), 500) }
+		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
 	});
 });
 
-//-Fine impostazioni FullCalendar-------------------------------------------------------//
+//-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
 
-function updateEventsOnServer(callback) {
-	var events = getAllEvents();
+/**
+ * Creates an event on the calendar
+ * 
+ * TODO: update the information on the server only of the new event
+ */
+function makeEvent(title, start, end) {
+	mainCal.fullCalendar('renderEvent', {
+		title: title,
+		start: start,
+		end: end
+	});
 
-	saveOnServer("/save", events, callback);
+	updateAll();
 }
 
 /**
- * Gets all events from calendar
+ * Deletes an event on the calendar given the ID
+ *
+ * TODO: update the information on the server only of the deleted event
+ */
+function deleteEvent(id) {
+	mainCal.fullCalendar('removeEvents', id);
+	updateAll();
+}
+
+/**
+ * Decorates the event with a red border
+ * 
+ * @param event The current event
+ */
+function selectEvent(event) {
+	$(pastSelectedEvent).css('border-color', '');
+	$(event).css('border-color', 'red');
+}
+
+/**
+ * Gets all the rendered events from calendar
  */
 function getAllEvents() {
-	var events = $('#agenda-calendar').fullCalendar('clientEvents'); // Gets all events from the calendar
+	var events = mainCal.fullCalendar('clientEvents'); // Gets all events from the calendar
 
 	/**
 	 * Removes the eventObject from the fetched events
@@ -227,92 +289,56 @@ function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
 }
-
-/**
- * Creates an event on the calendar
- */
-function makeEvent(title, start, end) {
-	$('#agenda-calendar').fullCalendar('renderEvent', {
-		title: title,
-		start: start,
-		end: end
-		});
-
-	updateAll();
-}
-
-function makeEventFromEvent(event) {
-	$('#agenda-calendar').fullCalendar('renderEvent', {
-		title: event.title,
-		start: event.start,
-		end: event.end
-		});
-
-	updateAll();
-}
-
-/**
- * Deletes an event on the calendar given the ID
- */
-function deleteEvent(id) {
-	$('#agenda-calendar').fullCalendar('removeEvents', id);
-	updateAll();
-}
 function updateAll() {
 	updateEventsOnServer(updateCalendars);
 }
 
 function updateCalendars() {
-	$('#agenda-calendar').fullCalendar('refetchEvents');
-	$('#month_preview-calendar').fullCalendar('refetchEvents');
+	mainCal.fullCalendar('refetchEvents');
+	preCal.fullCalendar('refetchEvents');
 }
+function updateEventsOnServer(callback) {
+	var events = getAllEvents();
+
+	saveOnServer("/save", events, callback);
+}
+
+
+/**
+ * Saves data on the server
+ * 
+ * @param url The server url
+ * @param data The data that needs to be sent
+ * @param callback The callback function, executed after the call has been made
+ */
 function saveOnServer(url, data, callback) {
+	/**
+	 * Axios POST call with the data
+	 */
 	axios({
 		url: url,
 		method: "post",
 		data: data
 	})
-		.then(callback);
+		.then(callback); // executes the callback function after the call
 }
 
+/**
+ * Gets the data from the server
+ * 
+ * @param url The server url
+ * 
+ * TODO: Specify the start date and the end date
+ */
 function readFromServer(url) {
+	/**
+	 * Axios GET call from the server
+	 */
 	axios({
 		url: url,
 		method: "get"
 	})
-		.then(function (response) {
-			return response;
-		})
+		.then((response) => { return response }) // Returns the response from the server
 
 	return null;
-}
-
-/**
- * Debug/Test function
- ** DEBUG ONLY
- */
-function debug() {
-	var events = getAllEvents();
-	var str = "";
-
-	for (const index in events) {
-		str += getEventInformations(events[index]) + " --- ";
-	}
-
-	return str;
-}
-
-/**
- * Because of the nature of the eventObject, in particular the resourceObject,
- * the event cannot be read as a Json object thus i had to make this function
- ** DEBUG ONLY
- */
-function getEventInformations(event) {
-	var str = "";
-
-	for (const index in event) {
-		str += index + ": " + event[index] + " - ";
-	}
-
-	return str;
 }
