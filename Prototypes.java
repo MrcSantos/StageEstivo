@@ -11,7 +11,7 @@ public static list<Evento> leggi(String ownerId, int|String inizio, int|String f
  * 
  * @param nuovo: Eventi da modificare, passati tramite la chiamata al server
  */
-public static boolean salva(list<Evento> nuovo);
+public static boolean salva(String ownerId, list<Evento> nuovo);
 
 
 
@@ -23,7 +23,7 @@ public static list<Evento> leggiTemplate(String ownerId);
 /**
  * Salva gli eventi ottenuti come template di default
  */
-public static boolean scriviTemplate(list<Evento> template);
+public static boolean scriviTemplate(String ownerId, list<Evento> template);
 
 
 
