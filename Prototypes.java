@@ -4,7 +4,7 @@
  * @param inizio: La data e l'orario di inizio
  * @param fine: La data e l'orario di fine
  */
-public static Record leggi(String ownerId, Date inizio, Date fine);
+public static list<Evento> leggi(String ownerId, Date inizio, Date fine);
 
 /**
  * Modifica il record vecchio con quello nuovo tramite l'id
@@ -47,7 +47,7 @@ public static boolean chiudiMese(String ownerId, String mese); // Mese in ingles
  * La classe Evento dovrà contenere al minimo queste variabili
  */
 public class Evento {
-	id:String // Id incrementale fornito dal database
+	_id:String // Id incrementale fornito fullcalendar
 	title:String // Titolo dell'evento
 	start:Date // Data inizio
 	end:Date // Data fine
@@ -67,6 +67,11 @@ public class Campo {
 	causale:String
 }
 
-public class Record {
-
+public class Record { // I record sono mensili e contengono gli eventi di tale mese
+	id:String // Id incrementale fornito dal database
+	ownerId:String
+	data:Date
+	isClosed:boolean
+	Eventi:list<Evento>
+	template:list<Evento>
 }
