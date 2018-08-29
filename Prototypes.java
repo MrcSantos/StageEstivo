@@ -4,7 +4,7 @@
  * @param inizio: La data e l'orario di inizio
  * @param fine: La data e l'orario di fine
  */
-public static list<Evento> leggi(String ownerId, int|String inizio, int|String fine);
+public static Record leggi(String ownerId, Date inizio, Date fine);
 
 /**
  * Modifica il record vecchio con quello nuovo tramite l'id
@@ -30,12 +30,16 @@ public static boolean scriviTemplate(String ownerId, list<Evento> template);
 /**
  * Fornisce gli eventi di default
  */
-public static Report leggiReport(String ownerId, int|String mese);
+public static Report leggiReport(String ownerId, String mese); // Mese in inglese
 
 /**
  * Salva gli eventi ottenuti come template di default
  */
 public static boolean scriviReport(String ownerId, Report report);
+
+
+
+public static boolean chiudiMese(String ownerId, String mese); // Mese in inglese
 
 
 
@@ -45,8 +49,8 @@ public static boolean scriviReport(String ownerId, Report report);
 public class Evento {
 	id:String // Id incrementale fornito dal database
 	title:String // Titolo dell'evento
-	start:int|String // Data inizio
-	end:int|String // Data fine
+	start:Date // Data inizio
+	end:Date // Data fine
 	editable:boolean // se è modificabile (Non viene fornito ma viene modificato quando il mese viene chiuso)
 	isRemote:boolean // Se il lavoro è remoto
 }
@@ -57,8 +61,12 @@ public class Report {
 }
 
 public class Campo {
-	data:int|String
+	data:Date
 	orePresente:int
 	oreAssente:int
 	causale:String
+}
+
+public class Record {
+
 }
