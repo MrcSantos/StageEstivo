@@ -13,6 +13,8 @@ public static list<Evento> leggi(String ownerId, Date inizio, Date fine);
  */
 public static boolean salva(String ownerId, list<Evento> nuovo);
 
+public static boolean elimina(String ownerId, list<Evento> eventi);
+
 
 
 /**
@@ -72,6 +74,6 @@ public class Record { // I record sono mensili e contengono gli eventi di tale m
 	ownerId:String
 	data:Date
 	isClosed:boolean
-	Eventi:list<Evento>
+	eventi:list<Evento>
 	template:list<Evento>
 }
