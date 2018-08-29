@@ -28,6 +28,18 @@ public static boolean scriviTemplate(String ownerId, list<Evento> template);
 
 
 /**
+ * Fornisce gli eventi di default
+ */
+public static Report leggiReport(String ownerId, int|String mese);
+
+/**
+ * Salva gli eventi ottenuti come template di default
+ */
+public static boolean scriviReport(String ownerId, Report report);
+
+
+
+/**
  * La classe Evento dovrà contenere al minimo queste variabili
  */
 public class Evento {
@@ -37,4 +49,16 @@ public class Evento {
 	end:int|String // Data fine
 	editable:boolean // se è modificabile (Non viene fornito ma viene modificato quando il mese viene chiuso)
 	isRemote:boolean // Se il lavoro è remoto
+}
+
+public class Report {
+	campi:list<Campo>
+	oreTotali:int
+}
+
+public class Campo {
+	data:int|String
+	orePresente:int
+	oreAssente:int
+	causale:String
 }
