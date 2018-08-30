@@ -37,11 +37,13 @@ public static Report leggiReport(String ownerId, String mese); // Mese in ingles
 /**
  * Salva gli eventi ottenuti come template di default
  */
-public static boolean scriviReport(String ownerId, Report report);
+public static boolean scriviReport(String ownerId, String mese, Report report);
 
 
 
-public static boolean chiudiMese(String ownerId, String mese); // Mese in inglese
+public static boolean isChiuso(String ownerId, String mese); // Mese in inglese
+
+public static boolean chiudiMese(String ownerId, String mese, Report report); // Mese in inglese
 
 
 
@@ -73,7 +75,6 @@ public class Record { // I record sono mensili e contengono gli eventi di tale m
 	id:String // Id incrementale fornito dal database
 	ownerId:String
 	data:Date
-	isClosed:boolean
 	eventi:list<Evento>
 	template:list<Evento>
 }

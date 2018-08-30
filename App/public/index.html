@@ -12,28 +12,497 @@
 	<script src='javascripts/fullcalendar/lib/jquery.min.js'></script>
 	<script src='javascripts/fullcalendar/lib/moment.min.js'></script>
 	<script src='javascripts/fullcalendar/fullcalendar.js'></script>
+	<script src='javascripts/array2table.js'></script>
 	<script src='javascripts/main.js'></script>
 </head>
 
 <body>
 	<div style="margin:1vw">
-		<div class="slds-grid slds-gutters">
-			<div class="slds-col slds-size_4-of-5">
-				<div id='agenda-calendar'></div>
+		<div class="calendars">
+			<div class="slds-grid slds-gutters">
+				<div class="slds-col slds-size_4-of-5">
+					<div id='agenda-calendar'></div>
+				</div>
+				<div class="slds-col slds-size_1-of-5">
+					<div id='month_preview-calendar'></div>
+				</div>
 			</div>
-			<div class="slds-col slds-size_1-of-5">
-				<div id='month_preview-calendar'></div>
+		</div>
+		<div>
+			<div class="slds-modal" aria-hidden="false" role="dialog" id="modal">
+				<div style="width: 80%;max-width:unset !important;" class="slds-modal__container">
+					<div class="slds-modal__header">
+						<button class="slds-button slds-button--icon-inverse slds-modal__close" onclick="closeModal()">X </button>
+
+						<!-- Header content -->
+						<div class="slds-clearfix">
+							<div class="slds-float_left">
+								<!-- TODO: Insert current date from js -->
+								<p id="modalCurrentDate">Mese del report</p>
+							</div>
+							<div class="slds-float_right">
+								<!-- TODO: Insert current user name from sf -->
+								<p id="modalCurrentUser">Nome Cognome</p>
+							</div>
+						</div>
+					</div>
+					<div class="slds-modal__content slds-p-around--medium">
+						<table class="slds-table slds-table_bordered slds-table_col-bordered">
+							<thead>
+								<tr class="slds-text-title_caps">
+									<th scope="col">
+										<span>Giorno</span>
+									</th>
+									<th scope="col">
+										<span>Presenze</span>
+									</th>
+									<th scope="col">
+										<span>Assenze</span>
+									</th>
+									<th scope="col">
+										<span>Causale</span>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum nec, diam.
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>4</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed elit dui, pellentesque a, faucibus vel, interdum
+											nec, diam.
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+								<tr>
+									<td data-label="Contact">
+										<div> Ven 2018-08-30</div>
+									</td>
+									<td data-label="Contact">
+										<div>8</div>
+									</td>
+									<td data-label="Contact">
+										<div>0</div>
+									</td>
+									<td data-label="Contact">
+										<div></div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<!-- Modal footer -->
+					<div class="slds-modal__footer">
+						<!-- Button to close modal -->
+						<button class="slds-button slds-button_outline-brand" onclick="closeModal()">Cancel</button><!-- Button to save report -->
+						<button class="slds-button slds-button--neutral slds-button--brand" onclick="alert('Funzione non ancora supportata');">Save</button>
+						<!-- End of the modal -->
+					</div>
+				</div>
 			</div>
+			<!-- backdrop modal -->
+			<div class="slds-backdrop" id="backdrop"></div>
 		</div>
 	</div>
 </body>
 
 <style>
-	.fc-toolbar h2 {
+	.slds-text-title_caps {
+		position: sticky;
+	}
+
+	.slds-modal__close {
+		background-color: #D90000 !important;
+	}
+
+	.calendars .fc-toolbar h2 {
 		font-size: 2vh;
 	}
 
-	button {
+	.calendars button {
 		background: #0070d2 !important;
 		background-color: #0070d2 !important;
 		color: white !important;
@@ -41,23 +510,23 @@
 		text-decoration: white !important;
 	}
 
-	.fc-today {
-		background: #FFFFE6 !important;
+	.calendars .fc-today {
+		background: #FFFED3 !important;
 	}
 
-	.fc-highlight {
+	.calendars .fc-highlight {
 		background: red !important;
 	}
 
-	.fc-agendaWeek-view tr {
+	.calendars .fc-agendaWeek-view tr {
 		height: 3.2vh !important;
 	}
 
-	.fc-agendaDay-view tr {
+	.calendars .fc-agendaDay-view tr {
 		height: 3.2vh !important;
 	}
 
-	.fc-event {
+	.calendars .fc-event {
 		background-color: #6ca5c2 !important;
 		color: white !important;
 		border-radius: 8px !important;

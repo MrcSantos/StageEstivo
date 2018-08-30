@@ -28,6 +28,18 @@ function init() {
 
 }
 
+//Modal Open
+function openModal() {
+	$('#backdrop').addClass('slds-backdrop--open');
+	$('#modal').addClass('slds-fade-in-open');
+}
+
+//Modal Close
+function closeModal() {
+	$('#modal').removeClass('slds-fade-in-open');
+	$('#backdrop').removeClass('slds-backdrop--open');
+}
+
 $(() => {
 	preCal = $('#month_preview-calendar');
 	mainCal = $('#agenda-calendar');
@@ -54,10 +66,32 @@ $(() => {
 			right: 'pre,nex' // Displays the two custom buttons
 		},
 
+		footer: {
+			left: '', // Displays the scoped date on the left
+			center: '',
+			right: 'report closeMonth' // Displays the two custom buttons
+		},
+
 		/**
 		 * Custom buttons settings
 		 */
 		customButtons: {
+			report: {
+				text: "Report",
+
+				click: () => {
+					openModal();
+				}
+			},
+
+			closeMonth: {
+				text: "Chiudi mese",
+
+				click: () => {
+					alert("Funzione non ancora supportata");
+				}
+			},
+
 			pre: {
 				text: "<", // Button text
 
@@ -108,16 +142,16 @@ $(() => {
 		 * Header settings
 		 */
 		header: {
-			left: 'today title', // Shows the "today" button current scoped date
+			left: 'title', // Shows the "today" button current scoped date
 			center: '',
-			right: 'removeEventButton pre,nex' // Shows the custom buttons
+			right: 'makeRemote removeEventButton pre,nex' // Shows the custom buttons
 		},
 
 		/**
 		 * footer settings
 		 */
 		footer: {
-			left: '',
+			left: 'undo',
 			center: '',
 			right: 'toggleCalendarView toggleWeekEndDays' // Shows the custom buttons
 		},
@@ -126,6 +160,22 @@ $(() => {
 		 * Custom buttons settings
 		 */
 		customButtons: {
+			makeRemote: {
+				text: "Rendi remoto/sede",
+
+				click: () => {
+					alert("Funzione non ancora supportata");
+				}
+			},
+
+			undo: {
+				text: "Undo",
+
+				click: () => {
+					alert("Funzione non ancora supportata");
+				}
+			},
+
 			pre: {
 				text: "<", // Button text
 
@@ -184,7 +234,7 @@ $(() => {
 			 * if none are given it will notify it
 			 */
 			removeEventButton: {
-				text: '-', // Button text
+				text: 'Rimuovi', // Button text
 
 				click: function () {
 					if (selectedEvent) { deleteEvent(selectedEvent) }
@@ -234,7 +284,7 @@ $(() => {
 		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
 	});
 
-	init();
+	generateReport("ciao");
 });
 
 //-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
@@ -358,4 +408,37 @@ function readFromServer(url, callback) {
 		method: "get"
 	})
 		.then(callback) // Returns the response from the server
+}
+
+function conferma(text, yes, no) {
+	if (confirm(text)) yes()
+	else no()
+}
+
+function generateReport(oldReport) {
+	if (oldReport) {
+		newReport = generateReport();
+	}
+	else {
+		events = getAllEvents(); // TODO: prendere gli eventi del mese dal database
+		template = getAllEvents(); // TODO: prendere il template dal database
+
+		var giorno = {
+			"data": "",
+			"orePresente": 0,
+			"oreAssente": 0,
+			"causale": ""
+		}
+
+		var report = {
+			"giorni": Array(giorno),
+			"oreTotali": 0
+		}
+
+		for (const index in events) {
+
+		}
+
+		return report
+	}
 }
