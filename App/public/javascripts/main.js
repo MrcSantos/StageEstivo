@@ -1,3 +1,22 @@
+//Modal Open
+function openModal() {
+	$('#backdrop').addClass('slds-backdrop--open');
+	$('#modal').addClass('slds-fade-in-open');
+}
+
+//Modal Close
+function closeModal() {
+	$('#modal').removeClass('slds-fade-in-open');
+	$('#backdrop').removeClass('slds-backdrop--open');
+}
+
+function conferma(text, yes, no) {
+	if (confirm(text)) yes()
+	else no()
+}
+
+//----------------------------------------------------------------------------------------------------//
+
 /**
  ** Global variables:
  * @param selectedStartDate The selected start date and time
@@ -13,45 +32,73 @@ var selectedStartDate = null, selectedEndDate = null, selectedEvent = null, past
  */
 var preCal, mainCal;
 
+//----------------------------------------------------------------------------------------------------//
+
 const server = {
+	/**
+	 * Fetches the events from SalesForce server
+	 */
 	fetchEvents: (ownerId, start, end, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.getEventi}', ownerId, start, end, callback);
 	},
 
+	/**
+	 * Writes the events in SalesForce server
+	 */
 	writeEvents: (events, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.putEventi}', events, callback);
 	},
 
+	/**
+	 * Deletes an event from the SalesForce server
+	 */
 	deleteEvents: (events, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.removeEventi}', events, callback);
 	}
 };
 
+//--------------------------------------------------//
+
 const client = {
+	/**
+	 * Displays all teh events on the calendar
+	 */
 	displayEvents: (events) => {
 		mainCal.fullCalendar("renderEvents", events, false);
 		preCal.fullCalendar("renderEvents", events, false);
 	},
 
-
+	/**
+	 * Creates an event on the calendar
+	 */
 	createEvent: (event) => {
 		mainCal.fullCalendar("renderEvent", event, false);
 		preCal.fullCalendar("renderEvent", event, false);
 	},
 
-
+	/**
+	 * Changes the event type
+	 */
 	changeEventType: (event) => {
 		if (event.type === "In Sede") { event.type = "Remoto" }
 		else { event.type = "In Sede" }
 	},
 
+	/**
+	 * Deletes an event on the calendar
+	 */
 	deleteEvent: (event) => {
 		mainCal.fullCalendar('removeEvents', event._id);
 		preCal.fullCalendar('removeEvents', event._id);
 	}
 };
 
+//--------------------------------------------------//
+
 const template = {
+	/**
+	 * From template to events (week)
+	 */
 	parse: (template) => {
 		for (const day in template) {
 			currentDay = template[day];
@@ -65,19 +112,20 @@ const template = {
 		return template
 	},
 
-	templatify: () => {
+	/**
+	 * From events to template of the specified date
+	 */
+	templatify: (date) => {
 		var templateEvent = {};
 		var template = Array();
 
-		var startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week").startOf("day");
+		var startOfTheWeek = moment(date).startOf("week").startOf("day");
 		var theDayAfter = moment(startOfTheWeek).add(1, "day");
 
 		for (var i = 0; i < 7; i++) {
 			template.push(Array())
 
-			dayEvents = mainCal.fullCalendar("clientEvents", (event) => {
-				return moment(event.start).isBetween(moment(startOfTheWeek).add(i, "day"), moment(theDayAfter).add(i, "day"), null, "(]");
-			});
+			dayEvents = cal.getEvents(moment(startOfTheWeek).add(i, "day"), moment(theDayAfter).add(i, "day"));
 
 			for (const event in dayEvents) {
 				templateEvent = {};
@@ -93,16 +141,57 @@ const template = {
 		return template;
 	},
 
+	/**
+	 * Fetches the current set template from the server
+	 */
 	fetch: (ownerId, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.leggiTemplate}', ownerId, callback);
 	},
 
+	/**
+	 * Saves the template as the current template on the server
+	 */
 	save: (template, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.scriviTemplate}', template, callback);
 	}
 };
 
+//--------------------------------------------------//
+
+var cal = {
+	/**
+	 * Gets all the rendered events from calendar from start to end
+	 */
+	getEvents: (start, end) => {
+		return mainCal.fullCalendar("clientEvents", (event) => {
+			return moment(event.start).isBetween(moment(start), moment(end), null, "(]");
+		});
+	},
+
+	selectEvent: (event) => {
+		$(pastSelectedEvent).css('border-color', '');
+		$(event).css('border-color', 'red');
+	},
+
+	isDateSelected: () => {
+		return selectedStartDate && selectedEndDate;
+	},
+
+	setSelected: (start, end) => {
+		selectedStartDate = start;
+		selectedEndDate = end;
+	}
+};
+
+//--------------------------------------------------//
+
 var util = {
+	displayServerEvents: (ownerId, start, end) => {
+		server.fetchEvents(ownerId, start, end, (fetched) => {
+			client.displayEvents(fetched);
+		});
+	},
+
 	displayServerTemplate: (ownerId) => {
 		template.fetch(ownerId, (fetched) => {
 			client.displayEvents(template.parse(fetched));
@@ -110,7 +199,7 @@ var util = {
 	},
 
 	writeParsedTemplateOnServer: () => {
-		template.save(template.templatify());
+		template.save(template.templatify(mainCal.fullCalendar("getDate")));
 	},
 
 	createEventAndSave: (event) => {
@@ -125,46 +214,65 @@ var util = {
 		server.deleteEvents(event);
 		client.deleteEvent(event);
 	}
-}
+};
 
-var cal = {
+//--------------------------------------------------//
 
-}
+/**
+ * Saves the data on the server
+ * 
+ * @param url The server url
+ * @param data The data that needs to be sent
+ * @param callback The callback function, executed after the call has been made
+ */
+
+
+/**
+ * Gets the data from the server
+ * 
+ * @param url The server url
+ * 
+ * TODO: Specify the start date and the end date
+ */
 
 
 
 
-
-function templateParser(template) {
-	for (const day in template) {
-		currentDay = template[day];
-
-		for (const event in currentDay) {
-			currentEvent = currentDay[event];
-			currentEvent.start = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.start, "hours");
-			currentEvent.end = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.end, "hours");
-		}
+function generateReport(oldReport) {
+	if (oldReport) {
+		newReport = generateReport();
 	}
+	else {
+		events = getAllEvents(); // TODO: prendere gli eventi del mese dal database
+		template = getAllEvents(); // TODO: prendere il template dal database
 
-	return template
+		var giorno = {
+			"data": "",
+			"orePresente": 0,
+			"oreAssente": 0,
+			"causale": ""
+		}
+
+		var report = {
+			"giorni": Array(giorno),
+			"oreTotali": 0
+		}
+
+		for (const index in events) {
+
+		}
+
+		return report
+	}
 }
 
-//Modal Open
-function openModal() {
-	$('#backdrop').addClass('slds-backdrop--open');
-	$('#modal').addClass('slds-fade-in-open');
-}
-
-//Modal Close
-function closeModal() {
-	$('#modal').removeClass('slds-fade-in-open');
-	$('#backdrop').removeClass('slds-backdrop--open');
-}
+//----------------------------------------------------------------------------------------------------//
 
 $(() => {
-	//init();
 	preCal = $('#month_preview-calendar');
 	mainCal = $('#agenda-calendar');
+
+	//--------------------------------------------------//
 
 	/**
 	 * Renders the calendar with the options
@@ -381,7 +489,7 @@ $(() => {
 		 */
 		eventClick: function (currentEvent) {
 			selectedEvent = currentEvent;
-			selectEvent(this);	// Select effect on the current event	
+			cal.selectEvent(this);	// Select effect on the current event	
 			pastSelectedEvent = $(this);
 		},
 
@@ -404,14 +512,14 @@ $(() => {
 		 * and renders the event
 		 */
 		select: (startDate, endDate) => {
-			setSelected(startDate, endDate);
+			cal.setSelected(startDate, endDate);
 			makeEvent('Ore lavorate', startDate, endDate);
 		},
 
 		/**
 		 * Resets the two global variable when deselected (with a delay)
 		 */
-		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
+		unselect: (jsEvent, view) => { setTimeout(() => cal.setSelected(null, null), 500) }
 	});
 
 	setTimeout(() => {
@@ -433,138 +541,3 @@ $(() => {
 });
 
 //-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
-
-/**
- * Creates an event on the calendar
- * 
- * TODO: update the information on the server only of the new event
- */
-function makeEvent(title, start, end) {
-	mainCal.fullCalendar('renderEvent', {
-		title: title,
-		start: start,
-		end: end
-	});
-
-	updateAll();
-}
-
-/**
- * Deletes an event on the calendar given the ID
- *
- * TODO: update the information on the server only of the deleted event
- */
-function deleteEvent(event) {
-	console.log(event);
-	mainCal.fullCalendar('removeEvents', event._id);
-	writeOnServer("/delete", event);
-}
-
-/**
- * Decorates the event with a red border
- * 
- * @param event The current event
- */
-function selectEvent(event) {
-	$(pastSelectedEvent).css('border-color', '');
-	$(event).css('border-color', 'red');
-}
-
-/**
- * Gets all the rendered events from calendar
- */
-function getAllEvents() {
-	var events = mainCal.fullCalendar('clientEvents'); // Gets all events from the calendar
-
-	/**
-	 * Removes the eventObject from the fetched events
-	 * because it's a cyclic Json
-	 * when an event is created from the calendar
-	 * and it causes bugs
-	 */
-	for (const index in events) {
-		events[index].source = undefined;
-	}
-
-	return events;
-}
-
-/**
- * Checks if a date has been selected
- */
-function isDateSelected() {
-	return selectedStartDate && selectedEndDate;
-}
-
-/**
- * Sets the global variables values
- */
-function setSelected(start, end) {
-	selectedStartDate = start;
-	selectedEndDate = end;
-}
-function updateAll() {
-	updateEventsOnServer(updateCalendars);
-}
-
-function updateCalendars() {
-	mainCal.fullCalendar('refetchEvents');
-	preCal.fullCalendar('refetchEvents');
-}
-function updateEventsOnServer(callback) {
-	var events = getAllEvents();
-
-	writeOnServer("/save", events, callback);
-}
-
-
-/**
- * Saves the data on the server
- * 
- * @param url The server url
- * @param data The data that needs to be sent
- * @param callback The callback function, executed after the call has been made
- */
-
-
-/**
- * Gets the data from the server
- * 
- * @param url The server url
- * 
- * TODO: Specify the start date and the end date
- */
-
-
-function conferma(text, yes, no) {
-	if (confirm(text)) yes()
-	else no()
-}
-
-function generateReport(oldReport) {
-	if (oldReport) {
-		newReport = generateReport();
-	}
-	else {
-		events = getAllEvents(); // TODO: prendere gli eventi del mese dal database
-		template = getAllEvents(); // TODO: prendere il template dal database
-
-		var giorno = {
-			"data": "",
-			"orePresente": 0,
-			"oreAssente": 0,
-			"causale": ""
-		}
-
-		var report = {
-			"giorni": Array(giorno),
-			"oreTotali": 0
-		}
-
-		for (const index in events) {
-
-		}
-
-		return report
-	}
-}
