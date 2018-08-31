@@ -13,132 +13,9 @@ var selectedStartDate = null, selectedEndDate = null, selectedEvent = null, past
  */
 var preCal, mainCal;
 
-const server = {
-	fetchEvents: (ownerId, start, end, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.getEventi}', ownerId, start, end, callback);
-	},
-
-	writeEvents: (events, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.putEventi}', events, callback);
-	},
-
-	deleteEvents: (events, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.removeEventi}', events, callback);
-	}
-};
-
-const client = {
-	displayEvents: (events) => {
-		mainCal.fullCalendar("renderEvents", events, false);
-		preCal.fullCalendar("renderEvents", events, false);
-	},
-
-
-	createEvent: (event) => {
-		mainCal.fullCalendar("renderEvent", event, false);
-		preCal.fullCalendar("renderEvent", event, false);
-	},
-
-
-	changeEventType: (event) => {
-		if (event.type === "In Sede") { event.type = "Remoto" }
-		else { event.type = "In Sede" }
-	},
-
-	deleteEvent: (event) => {
-		mainCal.fullCalendar('removeEvents', event._id);
-		preCal.fullCalendar('removeEvents', event._id);
-	}
-};
-
-const template = {
-	parse: (template) => {
-		for (const day in template) {
-			currentDay = template[day];
-			for (const event in currentDay) {
-				currentEvent = currentDay[event];
-				currentEvent.start = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.start, "hours");
-				currentEvent.end = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.end, "hours");
-			}
-		}
-
-		return template
-	},
-
-	templatify: () => {
-		var templateEvent = {};
-		var template = Array();
-
-		var startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week").startOf("day");
-		var theDayAfter = moment(startOfTheWeek).add(1, "day");
-
-		for (var i = 0; i < 7; i++) {
-			template.push(Array())
-
-			dayEvents = mainCal.fullCalendar("clientEvents", (event) => {
-				return moment(event.start).isBetween(moment(startOfTheWeek).add(i, "day"), moment(theDayAfter).add(i, "day"), null, "(]");
-			});
-
-			for (const event in dayEvents) {
-				templateEvent = {};
-
-				templateEvent.type = dayEvents[event].type;
-				templateEvent.start = moment(dayEvents[event].start).hour();
-				templateEvent.end = moment(dayEvents[event].end).hour();
-
-				template[i].push(templateEvent);
-			}
-		}
-
-		return template;
-	},
-
-	fetch: (ownerId, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.leggiTemplate}', ownerId, callback);
-	},
-
-	save: (template, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.scriviTemplate}', template, callback);
-	}
-};
-
-var util = {
-	displayServerTemplate: (ownerId) => {
-		template.fetch(ownerId, (fetched) => {
-			client.displayEvents(template.parse(fetched));
-		})
-	},
-
-	writeParsedTemplateOnServer: () => {
-		template.save(template.templatify());
-	},
-
-	createEventAndSave: (event) => {
-		event.type = "In Locale";
-
-		server.writeEvents(event, () => {
-			client.createEvent(event);
-		});
-	},
-
-	deleteEventAndSave: (event) => {
-		server.deleteEvents(event);
-		client.deleteEvent(event);
-	}
-}
-
-var cal = {
-
-}
-
-
-
-
-
 function templateParser(template) {
 	for (const day in template) {
 		currentDay = template[day];
-
 		for (const event in currentDay) {
 			currentEvent = currentDay[event];
 			currentEvent.start = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.start, "hours");
@@ -162,7 +39,7 @@ function closeModal() {
 }
 
 $(() => {
-	//init();
+	init();
 	preCal = $('#month_preview-calendar');
 	mainCal = $('#agenda-calendar');
 
@@ -245,7 +122,7 @@ $(() => {
 		nowIndicator: true, // Shows current date/time indicator
 
 		eventOverlap: false, // Makes the events not stackable one above the other
-		events: "/fetch", // TODO: Take the events from SalesForce database
+		//events: "/fetch", // TODO: Take the events from SalesForce database
 
 		minTime: '07:00:00', // Shows day from 7:00
 		maxTime: '20:00:00', // to 20:00
@@ -390,14 +267,14 @@ $(() => {
 		 * 
 		 * TODO: Make the calls to update correctly only the modified event
 		 */
-		eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+		eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => { update(event) },
 
 		/**
 		 * When an event has been resized
 		 * 
 		 * TODO: Make the calls to update correctly only the modified event
 		 */
-		eventResize: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+		eventResize: (event, delta, revertFunc, jsEvent, ui, view) => { update(event) },
 
 		/**
 		 * Sets the two global variable to correct data format when selected
@@ -414,22 +291,18 @@ $(() => {
 		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
 	});
 
-	setTimeout(() => {
-		client.setAsTemplate()
-	}, 2000);
-	/*
-		function init() {
-			readFromServer("/fetch/template", (res) => {
-				res = res.data;
-	
-				var events = templateParser(res);
-	
-				for (const event in events) {
-					mainCal.fullCalendar("renderEvents", events[event], false);
-					preCal.fullCalendar("renderEvents", events[event], false);
-				}
-			})
-		}*/
+	function init() {
+		readFromServer("/fetch/template", (res) => {
+			res = res.data;
+
+			var events = templateParser(res);
+
+			for (const event in events) {
+				mainCal.fullCalendar("renderEvents", events[event], false);
+				preCal.fullCalendar("renderEvents", events[event], false);
+			}
+		})
+	}
 });
 
 //-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
@@ -445,8 +318,6 @@ function makeEvent(title, start, end) {
 		start: start,
 		end: end
 	});
-
-	updateAll();
 }
 
 /**
@@ -503,29 +374,14 @@ function setSelected(start, end) {
 	selectedStartDate = start;
 	selectedEndDate = end;
 }
-function updateAll() {
-	updateEventsOnServer(updateCalendars);
-}
-
-function updateCalendars() {
-	mainCal.fullCalendar('refetchEvents');
-	preCal.fullCalendar('refetchEvents');
-}
-function updateEventsOnServer(callback) {
-	var events = getAllEvents();
-
-	writeOnServer("/save", events, callback);
-}
-
 
 /**
  * Saves the data on the server
  * 
- * @param url The server url
- * @param data The data that needs to be sent
+ * @param events The data that needs to be sent
  * @param callback The callback function, executed after the call has been made
  */
-
+function writeOnServer(events, callback) { }
 
 /**
  * Gets the data from the server
@@ -534,7 +390,16 @@ function updateEventsOnServer(callback) {
  * 
  * TODO: Specify the start date and the end date
  */
-
+function readFromServer(url, callback) {
+	/**
+	 * Axios GET call from the server
+	 */
+	axios({
+		url: url,
+		method: "get"
+	})
+		.then(callback) // Returns the response from the server
+}
 
 function conferma(text, yes, no) {
 	if (confirm(text)) yes()
@@ -567,4 +432,7 @@ function generateReport(oldReport) {
 
 		return report
 	}
+}
+function update(event) {
+	writeOnServer()
 }

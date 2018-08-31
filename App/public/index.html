@@ -31,9 +31,7 @@
 		<div>
 			<div class="slds-modal" aria-hidden="false" role="dialog" id="modal">
 				<div style="width: 80%;max-width:unset !important;" class="slds-modal__container">
-					<div class="slds-modal__header">
-						<button class="slds-button slds-button--icon-inverse slds-modal__close" onclick="closeModal()">X </button>
-
+					<div class="slds-modal__header" style="font-size: 2vh;">
 						<!-- Header content -->
 						<div class="slds-clearfix">
 							<div class="slds-float_left">
@@ -42,7 +40,16 @@
 							</div>
 							<div class="slds-float_right">
 								<!-- TODO: Insert current user name from sf -->
-								<p id="modalCurrentUser">Nome Cognome</p>
+								<div class="slds-clearfix">
+									<div class="slds-float_left slds-m-right_xx-large">
+										<!-- TODO: Insert current date from js -->
+										<p id="modalCurrentUser">Nome Cognome</p>
+									</div>
+									<div class="slds-float_right">
+										<!-- TODO: Insert current user name from sf -->
+										<button class="slds-button slds-button--destructive" onclick="closeModal()">X </button>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

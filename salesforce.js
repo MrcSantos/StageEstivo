@@ -17,13 +17,20 @@ const server = {
 	fetchEvents: (ownerId, start, end, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.getEventi}', ownerId, start, end, callback);
 	},
-
 	writeEvents: (events, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.putEventi}', events, callback);
 	},
-
 	deleteEvents: (events, callback) => {
 		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.removeEventi}', events, callback);
+	},
+
+	//----------------------------------------------------------------------------------------------------------------------//
+
+	fetchTemplate: (ownerId, callback) => {
+		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.leggiTemplate}', ownerId, callback);
+	},
+	writeTemplate: (template, callback) => {
+		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.scriviTemplate}', template, callback);
 	}
 };
 
@@ -32,27 +39,18 @@ const client = {
 		mainCal.fullCalendar("renderEvents", events, false);
 		preCal.fullCalendar("renderEvents", events, false);
 	},
-
-
 	createEvent: (event) => {
 		mainCal.fullCalendar("renderEvent", event, false);
 		preCal.fullCalendar("renderEvent", event, false);
 	},
-
-
 	changeEventType: (event) => {
 		if (event.type === "In Sede") { event.type = "Remoto" }
 		else { event.type = "In Sede" }
 	},
 
-	deleteEvent: (event) => {
-		mainCal.fullCalendar('removeEvents', event._id);
-		preCal.fullCalendar('removeEvents', event._id);
-	}
-};
+	//----------------------------------------------------------------------------------------------------------------------//
 
-const template = {
-	parse: (template) => {
+	parseTemplate: (template) => {
 		for (const day in template) {
 			currentDay = template[day];
 			for (const event in currentDay) {
@@ -65,71 +63,18 @@ const template = {
 		return template
 	},
 
-	templatify: () => {
-		var templateEvent = {};
-		var template = Array();
+	setAsTemplate: () => {
+		console.log(mainCal.fullCalendar("getDate"));
 
-		var startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week").startOf("day");
-		var theDayAfter = moment(startOfTheWeek).add(1, "day");
+		weekEvents = mainCal.fullCalendar("clientEvents", (event) => {
 
-		for (var i = 0; i < 7; i++) {
-			template.push(Array())
+			return moment(event.start).isBetween();
+		})
 
-			dayEvents = mainCal.fullCalendar("clientEvents", (event) => {
-				return moment(event.start).isBetween(moment(startOfTheWeek).add(i, "day"), moment(theDayAfter).add(i, "day"), null, "(]");
-			});
-
-			for (const event in dayEvents) {
-				templateEvent = {};
-
-				templateEvent.type = dayEvents[event].type;
-				templateEvent.start = moment(dayEvents[event].start).hour();
-				templateEvent.end = moment(dayEvents[event].end).hour();
-
-				template[i].push(templateEvent);
-			}
-		}
-
-		return template;
-	},
-
-	fetch: (ownerId, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.leggiTemplate}', ownerId, callback);
-	},
-
-	save: (template, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.scriviTemplate}', template, callback);
 	}
 };
 
-var util = {
-	displayServerTemplate: (ownerId) => {
-		template.fetch(ownerId, (fetched) => {
-			client.displayEvents(template.parse(fetched));
-		})
-	},
 
-	writeParsedTemplateOnServer: () => {
-		template.save(template.templatify());
-	},
-
-	createEventAndSave: (event) => {
-		event.type = "In Locale";
-
-		server.writeEvents(event, () => {
-			client.createEvent(event);
-		});
-	},
-
-	deleteEventAndSave: (event) => {
-		server.deleteEvents(event);
-		client.deleteEvent(event);
-	}
-}
-
-var cal = {
-
-}
 
 
 
@@ -138,7 +83,6 @@ var cal = {
 function templateParser(template) {
 	for (const day in template) {
 		currentDay = template[day];
-
 		for (const event in currentDay) {
 			currentEvent = currentDay[event];
 			currentEvent.start = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.start, "hours");
@@ -162,7 +106,7 @@ function closeModal() {
 }
 
 $(() => {
-	//init();
+	init();
 	preCal = $('#month_preview-calendar');
 	mainCal = $('#agenda-calendar');
 
@@ -245,7 +189,7 @@ $(() => {
 		nowIndicator: true, // Shows current date/time indicator
 
 		eventOverlap: false, // Makes the events not stackable one above the other
-		events: "/fetch", // TODO: Take the events from SalesForce database
+		//events: "/fetch", // TODO: Take the events from SalesForce database
 
 		minTime: '07:00:00', // Shows day from 7:00
 		maxTime: '20:00:00', // to 20:00
@@ -414,22 +358,20 @@ $(() => {
 		unselect: (jsEvent, view) => { setTimeout(() => setSelected(null, null), 500) }
 	});
 
-	setTimeout(() => {
-		client.setAsTemplate()
-	}, 2000);
-	/*
-		function init() {
-			readFromServer("/fetch/template", (res) => {
-				res = res.data;
-	
-				var events = templateParser(res);
-	
-				for (const event in events) {
-					mainCal.fullCalendar("renderEvents", events[event], false);
-					preCal.fullCalendar("renderEvents", events[event], false);
-				}
-			})
-		}*/
+	client.setAsTemplate();
+
+	function init() {
+		readFromServer("/fetch/template", (res) => {
+			res = res.data;
+
+			var events = templateParser(res);
+
+			for (const event in events) {
+				mainCal.fullCalendar("renderEvents", events[event], false);
+				preCal.fullCalendar("renderEvents", events[event], false);
+			}
+		})
+	}
 });
 
 //-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
@@ -525,7 +467,9 @@ function updateEventsOnServer(callback) {
  * @param data The data that needs to be sent
  * @param callback The callback function, executed after the call has been made
  */
-
+function writeOnServer(data, callback) {
+	Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.putEventi}', data, callback);
+}
 
 /**
  * Gets the data from the server
@@ -534,7 +478,9 @@ function updateEventsOnServer(callback) {
  * 
  * TODO: Specify the start date and the end date
  */
-
+function readFromServer(ownerId, start, end, callback) {
+	Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.getEventi}', ownerId, start, end, callback);
+}
 
 function conferma(text, yes, no) {
 	if (confirm(text)) yes()
@@ -568,3 +514,15 @@ function generateReport(oldReport) {
 		return report
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

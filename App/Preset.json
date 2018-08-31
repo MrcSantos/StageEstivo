@@ -1,86 +1,54 @@
 [
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "09:00:00",
-		"end": "13:00:00"
-	},
-	{
-		"allDay": false,
-		"title": "Ore lavorate",
-		"start": "14:00:00",
-		"end": "18:00:00"
-	}
+	[
+		{
+			"type": "In Sede",
+			"start": 9,
+			"end": 13
+		}
+	],
+	[
+		{
+			"type": "In Sede",
+			"start": 9,
+			"end": 13
+		},
+		{
+			"type": "In Sede",
+			"start": 14,
+			"end": 18
+		}
+	],
+	[
+		{
+			"type": "In Sede",
+			"start": 9,
+			"end": 13
+		}
+	],
+	[
+		{
+			"type": "In Sede",
+			"start": 9,
+			"end": 13
+		},
+		{
+			"type": "In Sede",
+			"start": 14,
+			"end": 18
+		}
+	],
+	[
+		{
+			"type": "In Sede",
+			"start": 9,
+			"end": 13
+		},
+		{
+			"type": "In Sede",
+			"start": 14,
+			"end": 18
+		}
+	],
+	[],
+	[]
 ]
