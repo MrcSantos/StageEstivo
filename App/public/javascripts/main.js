@@ -38,34 +38,62 @@ const server = {
 	/**
 	 * Fetches the events from SalesForce server
 	 */
-	fetchEvents: (ownerId, start, end, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.getEventi}', ownerId, start, end, callback);
+	fetchEvents: (start, end, callback) => {
+		start = moment(start).format("x");
+		end = moment(end).format("x");
+
+		cPresenze.getEventi(userId, start, end, callback);
 	},
 
 	/**
 	 * Writes the events in SalesForce server
 	 */
+	writeEvent: (event, callback) => {
+		event.start = moment(event.start).format("x")
+		event.end = moment(event.end).format("x")
+
+		var events = Array(util.c2s(event))
+
+		cPresenze.putEventi(events, callback);
+	},
+
 	writeEvents: (events, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.putEventi}', events, callback);
+		for (const event in events)
+			events[event].start = moment(events[event].start).format("x")
+		events[event].end = moment(events[event].end).format("x")
+
+		var events = util.c2s(events)
+
+		cPresenze.putEventi(events, callback);
 	},
 
 	/**
 	 * Deletes an event from the SalesForce server
 	 */
-	deleteEvents: (events, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.removeEventi}', events, callback);
+	deleteEvents: (event, callback) => {
+		event.start = moment(event.start).format("x")
+		event.end = moment(event.end).format("x")
+
+		var events = Array(util.c2s(event))
+		cPresenze.removeEventi(events, callback)
 	}
+
 };
 
 //--------------------------------------------------//
 
 const client = {
 	/**
-	 * Displays all teh events on the calendar
+	 * Displays all the events on the calendar
 	 */
-	displayEvents: (events) => {
-		mainCal.fullCalendar("renderEvents", events, false);
-		preCal.fullCalendar("renderEvents", events, false);
+	displayEvents: (events, displayCal) => {
+		if (displayCal)
+			displayCal.fullCalendar("renderEvents", events, false);
+		else {
+			preCal.fullCalendar('removeEvents');
+			mainCal.fullCalendar("renderEvents", events, false);
+			preCal.fullCalendar("renderEvents", events, false);
+		}
 	},
 
 	/**
@@ -82,6 +110,8 @@ const client = {
 	changeEventType: (event) => {
 		if (event.type === "In Sede") { event.type = "Remoto" }
 		else { event.type = "In Sede" }
+
+		return event
 	},
 
 	/**
@@ -100,59 +130,51 @@ const template = {
 	 * From template to events (week)
 	 */
 	parse: (template) => {
-		for (const day in template) {
-			currentDay = template[day];
-			for (const event in currentDay) {
-				currentEvent = currentDay[event];
-				currentEvent.start = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.start, "hours");
-				currentEvent.end = moment(mainCal.fullCalendar("getDate").startOf("week").startOf("day")).add(day, "day").add(currentEvent.end, "hours");
-			}
-		}
+		for (const event in template) {
+			var start = template[event].start;
+			var end = template[event].end;
 
-		return template
-	},
+			var mstart = moment(start);
+			var mend = moment(end);
 
-	/**
-	 * From events to template of the specified date
-	 */
-	templatify: (date) => {
-		var templateEvent = {};
-		var template = Array();
-
-		var startOfTheWeek = moment(date).startOf("week").startOf("day");
-		var theDayAfter = moment(startOfTheWeek).add(1, "day");
-
-		for (var i = 0; i < 7; i++) {
-			template.push(Array())
-
-			dayEvents = cal.getEvents(moment(startOfTheWeek).add(i, "day"), moment(theDayAfter).add(i, "day"));
-
-			for (const event in dayEvents) {
-				templateEvent = {};
-
-				templateEvent.type = dayEvents[event].type;
-				templateEvent.start = moment(dayEvents[event].start).hour();
-				templateEvent.end = moment(dayEvents[event].end).hour();
-
-				template[i].push(templateEvent);
-			}
+			template[event].start = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mstart.day(), "day").add(mstart.hours(), "hours").add(mstart.minutes(), "minutes")
+			template[event].end = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mend.day(), "day").add(mend.hours(), "hours").add(mend.minutes(), "minutes")
 		}
 
 		return template;
 	},
 
 	/**
+	 * From events to template of the specified date
+	 */
+	templatify: () => {
+		var date = mainCal.fullCalendar("getDate")
+
+		var startOfTheWeek = moment(date).startOf("week").startOf("day");
+		var theWeekAfter = moment(startOfTheWeek).add(1, "week");
+
+		var events = cal.getMainEvents(startOfTheWeek, theWeekAfter);
+
+		return events;
+	},
+
+	/**
 	 * Fetches the current set template from the server
 	 */
-	fetch: (ownerId, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.leggiTemplate}', ownerId, callback);
+	fetch: (callback) => {
+		cPresenze.leggiTemplate(userId, callback);
 	},
 
 	/**
 	 * Saves the template as the current template on the server
 	 */
 	save: (template, callback) => {
-		Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.cPresenze.scriviTemplate}', template, callback);
+		for (const event in template) {
+			template[event].start = moment(template[event].start).format("x")
+			template[event].end = moment(template[event].end).format("x")
+		}
+		template = util.c2s(template);
+		cPresenze.scriviTemplate(template, callback)
 	}
 };
 
@@ -162,8 +184,17 @@ var cal = {
 	/**
 	 * Gets all the rendered events from calendar from start to end
 	 */
-	getEvents: (start, end) => {
+	getMainEvents: (start, end) => {
 		return mainCal.fullCalendar("clientEvents", (event) => {
+			return moment(event.start).isBetween(moment(start), moment(end), null, "(]");
+		});
+	},
+
+	/**
+ * Gets all the rendered events from calendar from start to end
+ */
+	getPreEvents: (start, end) => {
+		return preCal.fullCalendar("clientEvents", (event) => {
 			return moment(event.start).isBetween(moment(start), moment(end), null, "(]");
 		});
 	},
@@ -171,6 +202,7 @@ var cal = {
 	selectEvent: (event) => {
 		$(pastSelectedEvent).css('border-color', '');
 		$(event).css('border-color', 'red');
+		pastSelectedEvent = $(event);
 	},
 
 	isDateSelected: () => {
@@ -186,83 +218,172 @@ var cal = {
 //--------------------------------------------------//
 
 var util = {
-	displayServerEvents: (ownerId, start, end) => {
-		server.fetchEvents(ownerId, start, end, (fetched) => {
-			client.displayEvents(fetched);
+	s2c: (events) => {
+		if (Array.isArray(events)) {
+			for (const event in events) {
+				events[event].title = events[event].Subject;
+
+				events[event].start = events[event].StartDateTime;
+				events[event].end = events[event].EndDateTime;
+
+				events[event].allDay = events[event].isAllDayEvent || false;
+				events[event].type = events[event].Tipo_Presenza__c
+				events[event].num = event
+
+				events[event].Subject = undefined;
+				events[event].StartDateTime = undefined;
+				events[event].EndDateTime = undefined;
+				events[event].isAllDayEvent = undefined;
+				events[event].Tipo_Presenza__c = undefined;
+				events[event].Template__c = undefined;
+			}
+		}
+		else {
+			events.title = events.Subject;
+
+			events.start = events.StartDateTime;
+			events.end = events.EndDateTime;
+
+			events.allDay = events.isAllDayEvent || false;
+			events.type = events.Tipo_Presenza__c
+			events.num = 123
+
+			events.Subject = undefined;
+			events.StartDateTime = undefined;
+			events.EndDateTime = undefined;
+			events.isAllDayEvent = undefined;
+			events.Tipo_Presenza__c = undefined;
+			events.Template__c = undefined;
+		}
+		return events
+	},
+
+	c2s: (events) => {
+		if (Array.isArray(events)) {
+			for (const event in events) {
+				events[event].StartDateTime = events[event].start
+				events[event].EndDateTime = events[event].end
+				events[event].isAllDayEvent = events[event].allDay;
+				events[event].Subject = events[event].title;
+				events[event].Tipo_Presenza__c = events[event].type
+
+				events[event].num = undefined
+				events[event].source = undefined;
+				events[event]._id = undefined;
+				events[event].className = undefined;
+				events[event].allDay = undefined;
+				events[event].title = undefined;
+				events[event].start = undefined;
+				events[event].end = undefined;
+				events[event].type = undefined
+			}
+		}
+		else {
+			events.StartDateTime = events.start
+			events.EndDateTime = events.end
+			events.isAllDayEvent = events.allDay;
+			events.Subject = events.title;
+			events.Tipo_Presenza__c = events.type
+
+			events.num = undefined
+			events.source = undefined;
+			events._id = undefined;
+			events.className = undefined;
+			events.allDay = undefined;
+			events.title = undefined;
+			events.start = undefined;
+			events.end = undefined;
+			events.type = undefined
+		}
+
+		return events
+	},
+
+	displayServerEvents: (callback) => {
+		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
+
+		server.fetchEvents(startOfTheMonth, endOfTheMonth, (fetched) => {
+			client.displayEvents(util.s2c(fetched));
+			console.log(fetched)
+			callback
 		});
 	},
 
-	displayServerTemplate: (ownerId) => {
-		template.fetch(ownerId, (fetched) => {
-			client.displayEvents(template.parse(fetched));
+	displayServerTemplate: (callback) => {
+		template.fetch((fetched) => {
+			client.displayEvents(template.parse(util.s2c(fetched)));
+			callback
 		})
 	},
 
 	writeParsedTemplateOnServer: () => {
-		template.save(template.templatify(mainCal.fullCalendar("getDate")));
+		template.save(template.templatify(), () => { alert("Salvato") });
 	},
 
-	createEventAndSave: (event) => {
-		event.type = "In Locale";
+	updateEventAndSave: (event) => {
+		server.writeEvent(event, () => {
+		})
+	},
 
-		server.writeEvents(event, () => {
-			client.createEvent(event);
+	createEventAndSave: (start, end) => {
+		var event = {};
+
+		event.start = start;
+		event.end = end;
+		event.type = "In Sede";
+		event.title = "";
+
+		client.createEvent(event);
+
+		server.writeEvent(event, () => {
+
 		});
 	},
 
 	deleteEventAndSave: (event) => {
-		server.deleteEvents(event);
 		client.deleteEvent(event);
-	}
-};
+		server.deleteEvents(event, () => {
 
-//--------------------------------------------------//
+		});
+	},
 
-/**
- * Saves the data on the server
- * 
- * @param url The server url
- * @param data The data that needs to be sent
- * @param callback The callback function, executed after the call has been made
- */
+	changeEventType: (event) => {
+		server.writeEvents(event, () => {
+			event = client.changeEventType(event);
+		})
+	},
 
+	smartDisplayEvents: (displayCal) => {
+		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
-/**
- * Gets the data from the server
- * 
- * @param url The server url
- * 
- * TODO: Specify the start date and the end date
- */
+		startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week").startOf("day");
+		endOfTheWeek = moment(startOfTheMonth).add(1, "week");
 
+		server.fetchEvents(startOfTheMonth, endOfTheMonth, (fetched) => {
+			if (Array.isArray(fetched) && fetched.length > 0) {
+				console.log("Eventi")
+				client.displayEvents(util.s2c(fetched), displayCal);
+			}
+			else {
+				console.log("Template")
+				util.displayServerTemplate()
+			}
+		})
+	},
 
+	generateReport: () => {
+		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
+		var events = cal.getPreEvents(startOfTheMonth, endOfTheMonth);
 
-function generateReport(oldReport) {
-	if (oldReport) {
-		newReport = generateReport();
-	}
-	else {
-		events = getAllEvents(); // TODO: prendere gli eventi del mese dal database
-		template = getAllEvents(); // TODO: prendere il template dal database
+		for (const event in events) {
+			currentEvent = events[event];
 
-		var giorno = {
-			"data": "",
-			"orePresente": 0,
-			"oreAssente": 0,
-			"causale": ""
-		}
-
-		var report = {
-			"giorni": Array(giorno),
-			"oreTotali": 0
-		}
-
-		for (const index in events) {
 
 		}
-
-		return report
 	}
 }
 
@@ -284,14 +405,13 @@ $(() => {
 		titleFormat: 'MMM YYYY', // Edits the title date format
 		height: "auto", // Automatically adapts the calendar to the correct height
 
-		//events: "/fetch", // TODO: Taremoto/sedee the events from SalesForce database
-		editable: false, // Makes theremoto/sedecalendar non-editable
+		editable: false, // Makes the calendar non-editable
 
 		/**
 		 * Header settings
 		 */
 		header: {
-			left: 'title', // Displays remoto/sedehe scoped date on the left
+			left: 'title', // Displays the scoped date on the left
 			center: '',
 			right: 'pre,nex' // Displays the two custom buttons
 		},
@@ -325,18 +445,27 @@ $(() => {
 			pre: {
 				text: "<", // Button text
 
-				click: () => { preCal.fullCalendar('prev') } // Goes to the previous date
+				click: () => {
+					preCal.fullCalendar('prev')
+					util.smartDisplayEvents();
+				} // Goes to the previous date
 			},
 
 			nex: {
 				text: ">", // Button text
-				click: () => { preCal.fullCalendar('next') } // Goes to the next date
+				click: () => {
+					preCal.fullCalendar('next')
+					util.smartDisplayEvents();
+				} // Goes to the next date
 			}
 		},
 
 		navLinks: true, // Enables clickable day number
-		navLinkDayClick: (date) => { mainCal.fullCalendar('gotoDate', date) } // Makes the main calendar go to the selected date on the preview calendar
-	})
+		navLinkDayClick: (date) => {
+			mainCal.fullCalendar('gotoDate', date)
+			util.smartDisplayEvents();
+		} // Makes the main calendar go to the selected date on the preview calendar
+	});
 
 	/**
 	 * Renders the calendar with the options
@@ -351,9 +480,7 @@ $(() => {
 		titleFormat: 'DD MMMM YYYY', // Edits the title date format
 		allDaySlot: false, // Removes the all-day events slot
 		nowIndicator: true, // Shows current date/time indicator
-
 		eventOverlap: false, // Makes the events not stackable one above the other
-		events: "/fetch", // TODO: Take the events from SalesForce database
 
 		minTime: '07:00:00', // Shows day from 7:00
 		maxTime: '20:00:00', // to 20:00
@@ -381,7 +508,7 @@ $(() => {
 		 * footer settings
 		 */
 		footer: {
-			left: 'undo',
+			left: '',
 			center: '',
 			right: 'toggleCalendarView toggleWeekEndDays' // Shows the custom buttons
 		},
@@ -394,7 +521,7 @@ $(() => {
 				text: "Rendi template",
 
 				click: () => {
-					alert("Funzione non ancora supportata");
+					util.writeParsedTemplateOnServer()
 				}
 			},
 
@@ -402,7 +529,7 @@ $(() => {
 				text: "Rendi remoto/sede",
 
 				click: () => {
-					alert("Funzione non ancora supportata");
+					util.changeEventType(selectedEvent);
 				}
 			},
 
@@ -418,9 +545,9 @@ $(() => {
 				text: "<", // Button text
 
 				click: () => {
-					init()
 					mainCal.fullCalendar('prev'); // Goes to the previous date
 					preCal.fullCalendar('gotoDate', mainCal.fullCalendar('getDate')); // Makes the preview go to the changed date
+					util.smartDisplayEvents();
 				}
 			},
 
@@ -430,6 +557,7 @@ $(() => {
 				click: () => {
 					mainCal.fullCalendar('next'); // Goes to the next date
 					preCal.fullCalendar('gotoDate', mainCal.fullCalendar('getDate')); // Makes the preview go to the changed date
+					util.smartDisplayEvents();
 				}
 			},
 
@@ -447,6 +575,8 @@ $(() => {
 					 */
 					mainCal.fullCalendar('option', { weekends: !weekendsOption });
 					preCal.fullCalendar('option', { weekends: !weekendsOption });
+					mainCal.fullCalendar('removeEvents');
+					util.smartDisplayEvents();
 				}
 			},
 
@@ -464,6 +594,8 @@ $(() => {
 					 */
 					if (currentView == "agendaWeek") { mainCal.fullCalendar('changeView', 'agendaDay') }
 					else { mainCal.fullCalendar('changeView', 'agendaWeek') }
+					mainCal.fullCalendar('removeEvents');
+					util.smartDisplayEvents();
 				}
 			},
 
@@ -474,9 +606,9 @@ $(() => {
 			removeEventButton: {
 				text: 'Rimuovi', // Button text
 
-				click: function () {
-					if (selectedEvent) { deleteEvent(selectedEvent) }
-					else { alert("No selected event") }
+				click: () => {
+					if (selectedEvent) { util.deleteEventAndSave(selectedEvent) }
+					else { alert("Nessun evento selezionato") }
 				}
 			}
 		},
@@ -489,8 +621,8 @@ $(() => {
 		 */
 		eventClick: function (currentEvent) {
 			selectedEvent = currentEvent;
+
 			cal.selectEvent(this);	// Select effect on the current event	
-			pastSelectedEvent = $(this);
 		},
 
 		/**
@@ -498,14 +630,14 @@ $(() => {
 		 * 
 		 * TODO: Make the calls to update correctly only the modified event
 		 */
-		eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+		eventDrop: (event) => { util.updateEventAndSave(event) },
 
 		/**
 		 * When an event has been resized
 		 * 
 		 * TODO: Make the calls to update correctly only the modified event
 		 */
-		eventResize: (event, delta, revertFunc, jsEvent, ui, view) => { updateAll() },
+		eventResize: (event) => { util.updateEventAndSave(event) },
 
 		/**
 		 * Sets the two global variable to correct data format when selected
@@ -513,31 +645,14 @@ $(() => {
 		 */
 		select: (startDate, endDate) => {
 			cal.setSelected(startDate, endDate);
-			makeEvent('Ore lavorate', startDate, endDate);
+			util.createEventAndSave(startDate, endDate);
 		},
 
 		/**
 		 * Resets the two global variable when deselected (with a delay)
 		 */
-		unselect: (jsEvent, view) => { setTimeout(() => cal.setSelected(null, null), 500) }
+		unselect: () => { setTimeout(() => cal.setSelected(null, null), 500) }
 	});
 
-	setTimeout(() => {
-		client.setAsTemplate()
-	}, 2000);
-	/*
-		function init() {
-			readFromServer("/fetch/template", (res) => {
-				res = res.data;
-	
-				var events = templateParser(res);
-	
-				for (const event in events) {
-					mainCal.fullCalendar("renderEvents", events[event], false);
-					preCal.fullCalendar("renderEvents", events[event], false);
-				}
-			})
-		}*/
+	util.smartDisplayEvents();
 });
-
-//-Fine impostazioni FullCalendar---Inizio funzioni globali-----------------------------------------------------//
