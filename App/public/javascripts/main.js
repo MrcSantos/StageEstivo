@@ -373,18 +373,98 @@ var util = {
 		})
 	},
 
-	generateReport: () => {
-		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
-		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
+	generateReport: (temp) => {
+		if (temp) { // Fare il report con il template
+			template.fetch((fetched) => {
+				var events = util.s2c(fetched);
 
-		var events = cal.getPreEvents(startOfTheMonth, endOfTheMonth);
+				report(events)
+			})
+		}
+		else { // Fare il report dagli eventi del mese
+			startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+			endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
-		for (const event in events) {
-			currentEvent = events[event];
+			events = cal.getPreEvents(startOfTheMonth, endOfTheMonth);
 
-
+			report(events);
 		}
 	}
+}
+function report(events) {
+	var report = {
+		total: 0,
+		days: []
+	}
+	var i = 0;
+	var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
+	var pivot = moment(startOfTheMonth).dayOfYear();
+	console.log(pivot)
+
+	for (const event in events) {
+		if (events.hasOwnProperty(event)) {
+			const currentEvent = events[event];
+
+			var hours = moment(currentEvent.end - currentEvent.start).hours() - 1;
+			var minutes = moment(currentEvent.end - currentEvent.start).minutes();
+
+			if (minutes == 30)
+				hours += 0.5;
+
+			//console.log(hours);
+			report.total += hours;
+			currentDay = moment(currentEvent.start).dayOfYear() - pivot;
+			console.log(currentDay);
+			if (report.days[currentDay]) {
+				report.days[currentDay] += hours;
+			}
+			else {
+				report.days[currentDay] = hours;
+			}
+		}
+	}
+	console.log(report)
+}
+
+
+
+
+function generateTable(data) {
+	var html = '';
+
+	if (typeof (data[0]) === 'undefined') {
+		return null;
+	}
+
+	if (data[0].constructor === String) {
+		html += '<tr>\r\n';
+		for (var item in data) {
+			html += '<td>' + data[item] + '</td>\r\n';
+		}
+		html += '</tr>\r\n';
+	}
+
+	if (data[0].constructor === Array) {
+		for (var row in data) {
+			html += '<tr>\r\n';
+			for (var item in data[row]) {
+				html += '<td>' + data[row][item] + '</td>\r\n';
+			}
+			html += '</tr>\r\n';
+		}
+	}
+
+	if (data[0].constructor === Object) {
+		for (var row in data) {
+			html += '<tr>\r\n';
+			for (var item in data[row]) {
+				html += '<td>' + item + ':' + data[row][item] + '</td>\r\n';
+			}
+			html += '</tr>\r\n';
+		}
+	}
+
+	return html;
 }
 
 //----------------------------------------------------------------------------------------------------//
@@ -431,6 +511,7 @@ $(() => {
 
 				click: () => {
 					openModal();
+					util.generateReport()
 				}
 			},
 
