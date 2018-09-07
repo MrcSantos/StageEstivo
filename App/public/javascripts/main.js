@@ -87,10 +87,11 @@ const client = {
 	 * Displays all the events on the calendar
 	 */
 	displayEvents: (events, displayCal) => {
+		preCal.fullCalendar('removeEvents');
+
 		if (displayCal)
 			displayCal.fullCalendar("renderEvents", events, false);
 		else {
-			preCal.fullCalendar('removeEvents');
 			mainCal.fullCalendar("renderEvents", events, false);
 			preCal.fullCalendar("renderEvents", events, false);
 		}
@@ -108,8 +109,17 @@ const client = {
 	 * Changes the event type
 	 */
 	changeEventType: (event) => {
-		if (event.type === "In Sede") { event.type = "Remoto" }
-		else { event.type = "In Sede" }
+		if (event.type === "In Sede") {
+			console.log("Rosso")
+			$(event).css('background-color', 'red');
+			event.type = "Da Remoto"
+		}
+		else {
+
+			$(event).css('background-color', '#6ca5c2');
+			console.log("Blu")
+			event.type = "In Sede"
+		}
 
 		return event
 	},
@@ -134,11 +144,8 @@ const template = {
 			var start = template[event].start;
 			var end = template[event].end;
 
-			var mstart = moment(start);
-			var mend = moment(end);
-
-			template[event].start = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mstart.day(), "day").add(mstart.hours(), "hours").add(mstart.minutes(), "minutes")
-			template[event].end = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mend.day(), "day").add(mend.hours(), "hours").add(mend.minutes(), "minutes")
+			template[event].start = moment(moment(preCal.fullCalendar("getDate")).startOf("month")).add(moment(start).day(), "day").add(index, "weeks").add(moment(start).hours(), "hours").add(moment(start).minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
+			template[event].end = moment(moment(preCal.fullCalendar("getDate")).startOf("month")).add(moment(end).day(), "day").add(moment(end).hours(), "hours").add(moment(end).minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
 		}
 
 		return template;
@@ -154,6 +161,14 @@ const template = {
 		var theWeekAfter = moment(startOfTheWeek).add(1, "week");
 
 		var events = cal.getMainEvents(startOfTheWeek, theWeekAfter);
+
+		for (const event in events) {
+			if (events.hasOwnProperty(event)) {
+				const currentEvent = events[event];
+
+				currentEvent.Id = undefined
+			}
+		}
 
 		return events;
 	},
@@ -276,6 +291,7 @@ var util = {
 				events[event].start = undefined;
 				events[event].end = undefined;
 				events[event].type = undefined
+				events[event].Template__c = undefined
 			}
 		}
 		else {
@@ -285,6 +301,7 @@ var util = {
 			events.Subject = events.title;
 			events.Tipo_Presenza__c = events.type
 
+			events.Template__c = undefined
 			events.num = undefined
 			events.source = undefined;
 			events._id = undefined;
@@ -300,20 +317,23 @@ var util = {
 	},
 
 	displayServerEvents: (callback) => {
-		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+		var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
 		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
 		server.fetchEvents(startOfTheMonth, endOfTheMonth, (fetched) => {
+
 			client.displayEvents(util.s2c(fetched));
-			console.log(fetched)
 			callback
 		});
 	},
 
-	displayServerTemplate: (callback) => {
+	displayServerTemplate: (cal, callback) => {
 		template.fetch((fetched) => {
-			client.displayEvents(template.parse(util.s2c(fetched)));
-			callback
+			for (const event in fetched) {
+				fetched[event].Id = undefined
+			}
+			client.displayEvents(template.parse(util.s2c(fetched)), cal);
+
 		})
 	},
 
@@ -343,22 +363,24 @@ var util = {
 
 	deleteEventAndSave: (event) => {
 		client.deleteEvent(event);
+
 		server.deleteEvents(event, () => {
 
 		});
 	},
 
 	changeEventType: (event) => {
-		server.writeEvents(event, () => {
-			event = client.changeEventType(event);
+		event = client.changeEventType(event);
+		server.writeEvent(event, () => {
+
 		})
 	},
 
 	smartDisplayEvents: (displayCal) => {
-		startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+		var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
 		endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
-		startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week").startOf("day");
+		startOfTheWeek = moment(mainCal.fullCalendar("getDate")).startOf("week");
 		endOfTheWeek = moment(startOfTheMonth).add(1, "week");
 
 		server.fetchEvents(startOfTheMonth, endOfTheMonth, (fetched) => {
@@ -368,38 +390,43 @@ var util = {
 			}
 			else {
 				console.log("Template")
-				util.displayServerTemplate()
+				util.displayServerTemplate(displayCal)
 			}
 		})
 	},
 
 	generateReport: (temp) => {
+		var events;
+
 		if (temp) { // Fare il report con il template
 			template.fetch((fetched) => {
-				var events = util.s2c(fetched);
-
-				report(events)
+				events = util.s2c(fetched);
 			})
 		}
 		else { // Fare il report dagli eventi del mese
-			startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month").startOf("week").startOf("day");
+			var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
 			endOfTheMonth = moment(startOfTheMonth).add(1, "month");
 
 			events = cal.getPreEvents(startOfTheMonth, endOfTheMonth);
-
-			report(events);
 		}
+
+		var report = reporter(events);
+
+		console.log(report)
+
+		$("#Report").html(generateTable(report))
 	}
 }
-function report(events) {
+function reporter(events) {
 	var report = {
-		total: 0,
-		days: []
+		days: [],
+		total: 0
 	}
-	var i = 0;
+
 	var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
+	var endOfTheMonth = moment(startOfTheMonth).add(1, "month");
+
 	var pivot = moment(startOfTheMonth).dayOfYear();
-	console.log(pivot)
 
 	for (const event in events) {
 		if (events.hasOwnProperty(event)) {
@@ -411,10 +438,9 @@ function report(events) {
 			if (minutes == 30)
 				hours += 0.5;
 
-			//console.log(hours);
 			report.total += hours;
 			currentDay = moment(currentEvent.start).dayOfYear() - pivot;
-			console.log(currentDay);
+
 			if (report.days[currentDay]) {
 				report.days[currentDay] += hours;
 			}
@@ -423,46 +449,39 @@ function report(events) {
 			}
 		}
 	}
-	console.log(report)
+	var sub = moment(endOfTheMonth).dayOfYear() - moment(startOfTheMonth).dayOfYear()
+
+	for (var i = 0; i < sub; i++) {
+		if (!report.days[i]) {
+			report.days[i] = "---";
+		}
+	}
+	return report
 }
 
 
 
 
 function generateTable(data) {
+	var startOfTheMonth = moment(preCal.fullCalendar("getDate")).startOf("month");
+
 	var html = '';
 
-	if (typeof (data[0]) === 'undefined') {
-		return null;
-	}
+	for (const day in data.days) {
+		if (data.days.hasOwnProperty(day)) {
+			const currentHours = data.days[day];
 
-	if (data[0].constructor === String) {
-		html += '<tr>\r\n';
-		for (var item in data) {
-			html += '<td>' + data[item] + '</td>\r\n';
-		}
-		html += '</tr>\r\n';
-	}
-
-	if (data[0].constructor === Array) {
-		for (var row in data) {
 			html += '<tr>\r\n';
-			for (var item in data[row]) {
-				html += '<td>' + data[row][item] + '</td>\r\n';
-			}
+			html += '<td>' + moment(moment(startOfTheMonth).add(day, "days")).format("dddd DD MMMM YYYY") + '</td>\r\n';
+			html += '<td>' + currentHours + '</td>\r\n';
 			html += '</tr>\r\n';
 		}
 	}
 
-	if (data[0].constructor === Object) {
-		for (var row in data) {
-			html += '<tr>\r\n';
-			for (var item in data[row]) {
-				html += '<td>' + item + ':' + data[row][item] + '</td>\r\n';
-			}
-			html += '</tr>\r\n';
-		}
-	}
+	html += '<tr>\r\n';
+	html += '<td><b>' + "Totale ore lavorate:" + '</b></td>\r\n';
+	html += '<td><b>' + data.total + '</b></td>\r\n';
+	html += '</tr>\r\n';
 
 	return html;
 }
@@ -499,7 +518,7 @@ $(() => {
 		footer: {
 			left: '', // Displays the scoped date on the left
 			center: '',
-			right: 'report closeMonth' // Displays the two custom buttons
+			right: 'report' // Displays the two custom buttons
 		},
 
 		/**
@@ -528,7 +547,7 @@ $(() => {
 
 				click: () => {
 					preCal.fullCalendar('prev')
-					util.smartDisplayEvents();
+					util.smartDisplayEvents(preCal);
 				} // Goes to the previous date
 			},
 
@@ -536,7 +555,7 @@ $(() => {
 				text: ">", // Button text
 				click: () => {
 					preCal.fullCalendar('next')
-					util.smartDisplayEvents();
+					util.smartDisplayEvents(preCal);
 				} // Goes to the next date
 			}
 		},
@@ -610,7 +629,8 @@ $(() => {
 				text: "Rendi remoto/sede",
 
 				click: () => {
-					util.changeEventType(selectedEvent);
+					if (selectedEvent) { util.changeEventType(selectedEvent) }
+					else { alert("Nessun evento selezionato") }
 				}
 			},
 
