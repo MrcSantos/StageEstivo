@@ -162,14 +162,6 @@ const template = {
 
 		var events = cal.getMainEvents(startOfTheWeek, theWeekAfter);
 
-		for (const event in events) {
-			if (events.hasOwnProperty(event)) {
-				const currentEvent = events[event];
-
-				currentEvent.Id = undefined
-			}
-		}
-
 		return events;
 	},
 
