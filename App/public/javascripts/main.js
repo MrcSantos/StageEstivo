@@ -147,8 +147,8 @@ const template = {
 			var mstart = moment(start);
 			var mend = moment(end);
 
-			template[event].start = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mstart.day(), "day").add(mstart.hours(), "hours").add(mstart.minutes(), "minutes")
-			template[event].end = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mend.day(), "day").add(mend.hours(), "hours").add(mend.minutes(), "minutes")
+			template[event].start = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mstart.day(), "day").add(mstart.hours(), "hours").add(mstart.minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
+			template[event].end = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mend.day(), "day").add(mend.hours(), "hours").add(mend.minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
 		}
 
 		return template;
