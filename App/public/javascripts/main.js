@@ -144,8 +144,11 @@ const template = {
 			var start = template[event].start;
 			var end = template[event].end;
 
-			template[event].start = moment(moment(preCal.fullCalendar("getDate")).startOf("month")).add(moment(start).day(), "day").add(index, "weeks").add(moment(start).hours(), "hours").add(moment(start).minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
-			template[event].end = moment(moment(preCal.fullCalendar("getDate")).startOf("month")).add(moment(end).day(), "day").add(moment(end).hours(), "hours").add(moment(end).minutes(), "minutes").subtract(1, "days").subtract(2, "hours")
+			var mstart = moment(start);
+			var mend = moment(end);
+
+			template[event].start = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mstart.day(), "day").add(mstart.hours(), "hours").add(mstart.minutes(), "minutes")
+			template[event].end = moment(mainCal.fullCalendar("getDate")).startOf("week").add(mend.day(), "day").add(mend.hours(), "hours").add(mend.minutes(), "minutes")
 		}
 
 		return template;
@@ -161,6 +164,14 @@ const template = {
 		var theWeekAfter = moment(startOfTheWeek).add(1, "week");
 
 		var events = cal.getMainEvents(startOfTheWeek, theWeekAfter);
+
+		for (const event in events) {
+			if (events.hasOwnProperty(event)) {
+				const currentEvent = events[event];
+
+				currentEvent.Id = undefined
+			}
+		}
 
 		return events;
 	},
